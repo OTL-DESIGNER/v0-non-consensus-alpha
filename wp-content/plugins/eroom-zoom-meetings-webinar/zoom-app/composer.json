@@ -1,0 +1,15 @@
+{
+    "name": "zoom/zoom",
+    "description": "Api Zoom",
+    "minimum-stability": "beta",
+    "require": {
+        "psr/cache": "1.0.1",
+        "guzzlehttp/guzzle": "7.7.0"
+    },
+    "autoload": {
+        "psr-4": {"Zoom\\": ""}
+    },
+    "config": {
+        "platform-check": false
+    }
+}

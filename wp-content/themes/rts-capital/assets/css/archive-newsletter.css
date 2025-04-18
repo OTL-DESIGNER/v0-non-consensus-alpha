@@ -1,0 +1,220 @@
+/**
+ * Non-Consensus Alpha - Newsletter Styles
+ * Styles for archive-newsletter.php & sidebar-newsletter.php
+ */
+
+:root {
+  --nca-orange: #ff9800;
+  --nca-orange-dark: #f57c00;
+  --nca-light-gray: #f5f5f5;
+  --nca-gray: #757575;
+  --nca-dark: #333333;
+  --nca-white: #ffffff;
+
+  --bs-primary: var(--nca-orange);
+  --bs-primary-rgb: 255, 152, 0;
+  --bs-secondary: var(--nca-gray);
+  --bs-secondary-rgb: 117, 117, 117;
+  --bs-light: var(--nca-light-gray);
+}
+
+/* Typography */
+body {
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  color: var(--nca-dark);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--nca-dark);
+  font-weight: 700;
+}
+
+.display-5 {
+  font-size: 2.5rem;
+  color: var(--nca-orange);
+}
+
+/* Main Card Styling */
+.newsletter-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.newsletter-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.newsletter-header {
+  background-color: var(--nca-orange);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.newsletter-header a {
+  color: white;
+}
+
+.newsletter-excerpt {
+  color: var(--nca-dark);
+}
+
+.text-muted {
+  color: var(--nca-gray) !important;
+}
+
+/* Buttons */
+.btn-newsletter,
+.button-primary {
+  background-color: var(--nca-orange);
+  border-color: var(--nca-orange);
+  color: white;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-newsletter:hover,
+.button-primary:hover {
+  background-color: var(--nca-orange-dark);
+  border-color: var(--nca-orange-dark);
+}
+
+.button {
+  display: inline-block;
+  padding: 0.5rem 1.25rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.button-block {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+/* Sidebar Styles */
+.sidebar-content {
+  padding-top: 1rem;
+}
+
+.sidebar-widget {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+.widget-header {
+  background-color: var(--nca-orange);
+  padding: 1rem;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.widget-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.widget-content {
+  padding: 1.25rem;
+}
+
+/* Subscription Status */
+.subscription-status {
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.subscription-active {
+  background-color: rgba(25, 135, 84, 0.1);
+  color: #198754;
+}
+
+.subscription-inactive {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
+.subscription-status h4 {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.subscription-status p {
+  margin-bottom: 0;
+}
+
+/* Quick Links */
+.quick-links-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.quick-links-list li {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #eee;
+  transition: all 0.2s ease;
+}
+
+.quick-links-list li:last-child {
+  border-bottom: none;
+}
+
+.quick-links-list a {
+  color: var(--nca-dark);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.quick-links-list a:hover {
+  color: var(--nca-orange);
+}
+
+/* Pagination */
+.pagination .page-link {
+  color: var(--nca-orange);
+  border-color: var(--nca-orange);
+}
+
+.pagination .page-item.active .page-link {
+  background-color: var(--nca-orange);
+  border-color: var(--nca-orange);
+  color: white;
+}
+
+/* Empty State */
+.card.shadow-sm .card-body {
+  padding: 2.5rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .display-5 {
+    font-size: 2rem;
+  }
+
+  .card-body {
+    padding: 1.25rem;
+  }
+
+  .quick-links-list li {
+    padding: 0.5rem 0;
+  }
+}
+
+/* Accessibility */
+a:focus,
+button:focus,
+.button:focus {
+  outline: 2px solid var(--nca-orange);
+  outline-offset: 2px;
+}
+

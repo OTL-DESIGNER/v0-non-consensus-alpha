@@ -1,0 +1,358 @@
+<?php
+/*
+Plugin Name: RTS Zoom Webhook
+Plugin URI: https://nonconsesus.com
+Description: Automatically creates webinar posts from Zoom recordings
+Version: 1.0
+Author: RTS Capital Management
+Text Domain: rts-zoom-webhook
+*/
+
+// Exit if accessed directly
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+// Zoom API credentials - replace with your actual values from the Zoom app
+define('ZOOM_VERIFICATION_TOKEN', 'your_verification_token_here');
+define('ZOOM_SECRET_TOKEN', 'your_secret_token_here');
+
+// Register the webhook endpoint
+add_action('rest_api_init', function () {
+    register_rest_route('rts/v1', '/zoom-webhook', array(
+        'methods' => 'POST,GET',  // Allow both for testing
+        'callback' => 'rts_handle_zoom_webhook',
+        'permission_callback' => '__return_true'
+    ));
+    
+    // Add a test endpoint for debugging
+    register_rest_route('rts/v1', '/test', array(
+        'methods' => 'GET',
+        'callback' => function() {
+            return array('status' => 'API is working!');
+        },
+        'permission_callback' => '__return_true'
+    ));
+});
+
+// Handle the webhook from Zoom
+function rts_handle_zoom_webhook($request) {
+    // Log all request details for debugging
+    error_log('======= ZOOM WEBHOOK DEBUG START =======');
+    error_log('REQUEST METHOD: ' . $_SERVER['REQUEST_METHOD']);
+    error_log('REQUEST HEADERS: ' . print_r(getallheaders(), true));
+    error_log('REQUEST BODY: ' . $request->get_body());
+    error_log('REQUEST PARAMS: ' . print_r($request->get_params(), true));
+    error_log('======= ZOOM WEBHOOK DEBUG END =======');
+    
+    // For GET requests (browser testing)
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        $params = $request->get_params();
+        if (isset($params['challenge'])) {
+            return new WP_REST_Response(array(
+                'plainToken' => $params['challenge']
+            ), 200);
+        }
+        // Normal GET response
+        return new WP_REST_Response(array('status' => 'success'), 200);
+    }
+    
+    // For POST requests (actual Zoom webhooks)
+    $body = $request->get_body();
+    $data = json_decode($body, true);
+    
+    // CRITICAL FIX: Handle Zoom endpoint validation
+    if (isset($data['event']) && $data['event'] === 'endpoint.url_validation') {
+        if (isset($data['payload']['plainToken'])) {
+            error_log('Zoom endpoint validation request received with token: ' . $data['payload']['plainToken']);
+            return new WP_REST_Response(array(
+                'plainToken' => $data['payload']['plainToken']
+            ), 200);
+        }
+    }
+    
+    // Handle legacy challenge for validation (older Zoom API)
+    if (isset($data['challenge'])) {
+        error_log('Zoom challenge received: ' . $data['challenge']);
+        return new WP_REST_Response(array(
+            'plainToken' => $data['challenge']
+        ), 200);
+    }
+    
+    // Verify Zoom signature if not a validation request
+    if (!verify_zoom_webhook($request)) {
+        error_log('Invalid Zoom webhook signature');
+        return new WP_REST_Response(array('error' => 'Invalid signature'), 401);
+    }
+    
+    // Process webhook events
+    if (isset($data['event'])) {
+        error_log('Processing Zoom event: ' . $data['event']);
+        
+        // Handle recording.completed event
+        if ($data['event'] === 'recording.completed') {
+            rts_process_recording($data);
+        }
+    }
+    
+    // Return success for all events
+    return new WP_REST_Response(array('status' => 'success'), 200);
+}
+
+// Verify if the webhook request is genuinely from Zoom
+function verify_zoom_webhook($request) {
+    // For testing - disable verification temporarily
+    if (defined('ZOOM_WEBHOOK_TESTING') && ZOOM_WEBHOOK_TESTING) {
+        return true;
+    }
+    
+    // Get headers
+    $headers = $request->get_headers();
+    
+    // Check for authorization header if using verification token
+    if (defined('ZOOM_VERIFICATION_TOKEN') && ZOOM_VERIFICATION_TOKEN && 
+        isset($headers['authorization']) && is_array($headers['authorization'])) {
+        $auth_header = $headers['authorization'][0];
+        if ($auth_header === 'Bearer ' . ZOOM_VERIFICATION_TOKEN) {
+            return true;
+        }
+    }
+    
+    // Check signature if using secret token
+    if (defined('ZOOM_SECRET_TOKEN') && ZOOM_SECRET_TOKEN && 
+        isset($headers['x-zm-signature']) && is_array($headers['x-zm-signature']) && 
+        isset($headers['x-zm-request-timestamp']) && is_array($headers['x-zm-request-timestamp'])) {
+        
+        $signature = $headers['x-zm-signature'][0];
+        $timestamp = $headers['x-zm-request-timestamp'][0];
+        $body = $request->get_body();
+        
+        // Create the message string to hash
+        $message = 'v0:' . $timestamp . ':' . $body;
+        
+        // Create the expected signature
+        $hash = 'v0=' . hash_hmac('sha256', $message, ZOOM_SECRET_TOKEN);
+        
+        // Compare signatures
+        if (hash_equals($hash, $signature)) {
+            return true;
+        }
+    }
+    
+    // For development/testing, you can uncomment this to bypass verification
+    // return true;
+    
+    return false;
+}
+
+// Process the recording and create/update a webinar post
+function rts_process_recording($data) {
+    // Extract recording information
+    $meeting_id = $data['payload']['object']['id'] ?? '';
+    $topic = $data['payload']['object']['topic'] ?? 'Untitled Webinar';
+    $recording_files = $data['payload']['object']['recording_files'] ?? [];
+    
+    if (empty($meeting_id) || empty($recording_files)) {
+        error_log('Invalid recording data');
+        return;
+    }
+    
+    // Find if there's an existing webinar post with this meeting ID
+    $existing_posts = get_posts(array(
+        'post_type' => 'webinar',
+        'meta_key' => 'zoom_meeting_id',
+        'meta_value' => $meeting_id,
+        'posts_per_page' => 1
+    ));
+    
+    // Prepare recording URLs
+    $recording_url = '';
+    foreach ($recording_files as $file) {
+        if (isset($file['file_type']) && $file['file_type'] === 'MP4') {
+            $recording_url = $file['download_url'];
+            break;
+        }
+    }
+    
+    if (empty($recording_url)) {
+        error_log('No MP4 recording found');
+        return;
+    }
+    
+    // Create or update the webinar post
+    if (!empty($existing_posts)) {
+        // Update existing post
+        $post_id = $existing_posts[0]->ID;
+        wp_update_post(array(
+            'ID' => $post_id,
+            'post_status' => 'publish'
+        ));
+        error_log("Updating existing webinar post: $post_id");
+    } else {
+        // Create new post
+        $post_id = wp_insert_post(array(
+            'post_title' => $topic,
+            'post_type' => 'webinar',
+            'post_status' => 'publish',
+            'post_content' => 'This webinar recording was automatically created from a Zoom webinar.'
+        ));
+        error_log("Created new webinar post: $post_id");
+    }
+    
+    if (!$post_id || is_wp_error($post_id)) {
+        error_log('Failed to create/update webinar post');
+        return;
+    }
+    
+    // Update the post metadata
+    update_post_meta($post_id, 'zoom_meeting_id', $meeting_id);
+    update_post_meta($post_id, 'webinar_recording', $recording_url);
+    update_post_meta($post_id, 'webinar_date', current_time('mysql'));
+    
+    // Set expiration date (2 months from now)
+    $expiration_date = date('Y-m-d', strtotime('+2 months'));
+    update_post_meta($post_id, 'webinar_expiration', $expiration_date);
+    
+    // Auto-restrict to appropriate subscription plans (adjust IDs as needed)
+    $webinar_plan_id = 11;    // Webinar Access plan ID
+    $bundle_plan_id = 12;     // Complete Bundle plan ID
+    update_post_meta($post_id, 'pms-content-restrict-subscription-plan', array($webinar_plan_id, $bundle_plan_id));
+    
+    error_log("Updated webinar post $post_id with recording URL");
+}
+
+// Add an admin menu item
+add_action('admin_menu', 'rts_zoom_webhook_menu');
+
+function rts_zoom_webhook_menu() {
+    add_options_page(
+        'RTS Zoom Webhook',
+        'RTS Zoom Webhook',
+        'manage_options',
+        'rts-zoom-webhook',
+        'rts_zoom_webhook_page'
+    );
+}
+
+// Admin page
+function rts_zoom_webhook_page() {
+    // Save settings if form is submitted
+    if (isset($_POST['rts_zoom_save_settings']) && check_admin_referer('rts_zoom_webhook_settings')) {
+        // Save verification token
+        if (isset($_POST['zoom_verification_token'])) {
+            update_option('rts_zoom_verification_token', sanitize_text_field($_POST['zoom_verification_token']));
+        }
+        
+        // Save secret token
+        if (isset($_POST['zoom_secret_token'])) {
+            update_option('rts_zoom_secret_token', sanitize_text_field($_POST['zoom_secret_token']));
+        }
+        
+        // Enable testing mode
+        update_option('rts_zoom_testing_mode', isset($_POST['zoom_testing_mode']) ? '1' : '0');
+        
+        echo '<div class="notice notice-success"><p>Settings saved successfully!</p></div>';
+        
+        // Define constants with new values
+        if (!defined('ZOOM_VERIFICATION_TOKEN')) {
+            define('ZOOM_VERIFICATION_TOKEN', get_option('rts_zoom_verification_token', ''));
+        }
+        if (!defined('ZOOM_SECRET_TOKEN')) {
+            define('ZOOM_SECRET_TOKEN', get_option('rts_zoom_secret_token', ''));
+        }
+        if (!defined('ZOOM_WEBHOOK_TESTING')) {
+            define('ZOOM_WEBHOOK_TESTING', get_option('rts_zoom_testing_mode', '0') === '1');
+        }
+    }
+    
+    // Get current settings
+    $verification_token = get_option('rts_zoom_verification_token', '');
+    $secret_token = get_option('rts_zoom_secret_token', '');
+    $testing_mode = get_option('rts_zoom_testing_mode', '0') === '1';
+    
+    ?>
+    <div class="wrap">
+        <h1>RTS Zoom Webhook</h1>
+        
+        <form method="post" action="">
+            <?php wp_nonce_field('rts_zoom_webhook_settings'); ?>
+            
+            <table class="form-table">
+                <tr>
+                    <th scope="row"><label for="zoom_verification_token">Verification Token</label></th>
+                    <td>
+                        <input type="text" id="zoom_verification_token" name="zoom_verification_token" 
+                            value="<?php echo esc_attr($verification_token); ?>" class="regular-text">
+                        <p class="description">Enter your Zoom app Verification Token.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="zoom_secret_token">Secret Token</label></th>
+                    <td>
+                        <input type="text" id="zoom_secret_token" name="zoom_secret_token" 
+                            value="<?php echo esc_attr($secret_token); ?>" class="regular-text">
+                        <p class="description">Enter your Zoom app Secret Token.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Testing Mode</th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="zoom_testing_mode" <?php checked($testing_mode); ?>>
+                            Enable testing mode (disable signature verification)
+                        </label>
+                        <p class="description">Only use for testing purposes, disable for production.</p>
+                    </td>
+                </tr>
+            </table>
+            
+            <p class="submit">
+                <input type="submit" name="rts_zoom_save_settings" class="button button-primary" value="Save Settings">
+            </p>
+        </form>
+        
+        <h2>Webhook Information</h2>
+        <p>Use this endpoint URL in your Zoom app webhook configuration:</p>
+        <code><?php echo site_url('/wp-json/rts/v1/zoom-webhook'); ?></code>
+        
+        <h3>Test Endpoints</h3>
+        <p>You can test the REST API with this URL:</p>
+        <p><a href="<?php echo site_url('/wp-json/rts/v1/test'); ?>" target="_blank"><?php echo site_url('/wp-json/rts/v1/test'); ?></a></p>
+        
+        <h2>Usage</h2>
+        <p>When a Zoom webinar recording is completed, this plugin will:</p>
+        <ol>
+            <li>Create a new webinar post (or update an existing one)</li>
+            <li>Add the recording URL to the post</li>
+            <li>Set expiration date (2 months from recording date)</li>
+            <li>Automatically restrict access to "Webinar Access" and "Complete Access Bundle" subscriptions</li>
+        </ol>
+        
+        <h2>Webhook Events</h2>
+        <p>Subscribe to the following Zoom webhook events:</p>
+        <ul>
+            <li><strong>recording.completed</strong> - Triggered when a recording is available</li>
+        </ul>
+        
+        <h3>Troubleshooting</h3>
+        <p>If you encounter webhook validation issues, try these steps:</p>
+        <ol>
+            <li>Enable Testing Mode temporarily</li>
+            <li>Check your WordPress error logs for webhook debugging information</li>
+            <li>Ensure your server doesn't have WAF rules blocking JSON requests</li>
+            <li>Verify your Zoom app has the correct endpoint URL</li>
+        </ol>
+    </div>
+    <?php
+}
+
+// Initialize constants from options if not defined yet
+if (!defined('ZOOM_VERIFICATION_TOKEN')) {
+    define('ZOOM_VERIFICATION_TOKEN', get_option('rts_zoom_verification_token', ''));
+}
+if (!defined('ZOOM_SECRET_TOKEN')) {
+    define('ZOOM_SECRET_TOKEN', get_option('rts_zoom_secret_token', ''));
+}
+if (!defined('ZOOM_WEBHOOK_TESTING')) {
+    define('ZOOM_WEBHOOK_TESTING', get_option('rts_zoom_testing_mode', '0') === '1');
+}

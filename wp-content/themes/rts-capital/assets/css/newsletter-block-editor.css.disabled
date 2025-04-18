@@ -1,0 +1,271 @@
+/* Key Takeaway Block */
+.newsletter-key-takeaway-editor {
+    display: flex;
+    background-color: #f4f6f9;
+    border-left: 4px solid #1abc9c;
+    padding: 20px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.newsletter-key-takeaway-editor .takeaway-icon {
+    flex: 0 0 40px;
+    text-align: center;
+}
+
+.newsletter-key-takeaway-editor .takeaway-icon .dashicons {
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
+    color: #1abc9c;
+}
+
+.newsletter-key-takeaway-editor .takeaway-content {
+    flex: 1;
+    padding-left: 15px;
+}
+
+.newsletter-key-takeaway-editor h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+.newsletter-key-takeaway-editor p {
+    margin: 0;
+}
+
+/* Data Chart Block */
+.newsletter-data-chart-editor {
+    background-color: #fff;
+    border: 1px solid #e0e6ed;
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.newsletter-data-chart-editor h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #2c3e50;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e0e6ed;
+}
+
+.newsletter-data-chart-editor .chart-placeholder {
+    background-color: #f4f6f9;
+    border-radius: 4px;
+    padding: 30px;
+    text-align: center;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.newsletter-data-chart-editor .chart-icon {
+    font-size: 40px;
+    color: #95a5a6;
+    margin-bottom: 15px;
+}
+
+.newsletter-data-chart-editor .chart-icon .dashicons {
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
+}
+
+/* Callout Block */
+.newsletter-callout-editor {
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.newsletter-callout-editor.callout-info {
+    background-color: #e8f4f8;
+    border-left: 4px solid #3498db;
+}
+
+.newsletter-callout-editor.callout-success {
+    background-color: #eafaf1;
+    border-left: 4px solid #2ecc71;
+}
+
+.newsletter-callout-editor.callout-warning {
+    background-color: #fef9e7;
+    border-left: 4px solid #f1c40f;
+}
+
+.newsletter-callout-editor.callout-error {
+    background-color: #fdedeb;
+    border-left: 4px solid #e74c3c;
+}
+
+.newsletter-callout-editor.callout-note {
+    background-color: #f8f9fa;
+    border-left: 4px solid #95a5a6;
+}
+
+.newsletter-callout-editor h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.newsletter-callout-editor.callout-info h4 {
+    color: #2980b9;
+}
+
+.newsletter-callout-editor.callout-success h4 {
+    color: #27ae60;
+}
+
+.newsletter-callout-editor.callout-warning h4 {
+    color: #f39c12;
+}
+
+.newsletter-callout-editor.callout-error h4 {
+    color: #c0392b;
+}
+
+.newsletter-callout-editor.callout-note h4 {
+    color: #7f8c8d;
+}
+
+.newsletter-callout-editor .callout-content p:last-child {
+    margin-bottom: 0;
+}
+/* Frontend CSS for newsletter blocks */
+
+/* Key Takeaway Block */
+.newsletter-key-takeaway {
+    display: flex;
+    background-color: #f4f6f9;
+    border-left: 4px solid #1abc9c;
+    padding: 20px;
+    border-radius: 6px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.newsletter-key-takeaway .takeaway-icon {
+    flex: 0 0 40px;
+    text-align: center;
+}
+
+.newsletter-key-takeaway .takeaway-icon .dashicons {
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
+    color: #1abc9c;
+}
+
+.newsletter-key-takeaway .takeaway-content {
+    flex: 1;
+    padding-left: 15px;
+}
+
+.newsletter-key-takeaway h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #2c3e50;
+    font-size: 1.2rem;
+}
+
+.newsletter-key-takeaway p {
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Data Chart Block */
+.newsletter-data-chart {
+    background-color: #fff;
+    border: 1px solid #e0e6ed;
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.newsletter-data-chart h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #2c3e50;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e0e6ed;
+    font-size: 1.3rem;
+}
+
+.newsletter-data-chart .chart-container {
+    height: 300px;
+    position: relative;
+}
+
+/* Callout Block */
+.newsletter-callout {
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.newsletter-callout.callout-info {
+    background-color: #e8f4f8;
+    border-left: 4px solid #3498db;
+}
+
+.newsletter-callout.callout-success {
+    background-color: #eafaf1;
+    border-left: 4px solid #2ecc71;
+}
+
+.newsletter-callout.callout-warning {
+    background-color: #fef9e7;
+    border-left: 4px solid #f1c40f;
+}
+
+.newsletter-callout.callout-error {
+    background-color: #fdedeb;
+    border-left: 4px solid #e74c3c;
+}
+
+/* Callout Block (continued) */
+.newsletter-callout.callout-note {
+    background-color: #f8f9fa;
+    border-left: 4px solid #95a5a6;
+}
+
+.newsletter-callout h4.callout-title {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+}
+
+.newsletter-callout.callout-info h4.callout-title {
+    color: #2980b9;
+}
+
+.newsletter-callout.callout-success h4.callout-title {
+    color: #27ae60;
+}
+
+.newsletter-callout.callout-warning h4.callout-title {
+    color: #f39c12;
+}
+
+.newsletter-callout.callout-error h4.callout-title {
+    color: #c0392b;
+}
+
+.newsletter-callout.callout-note h4.callout-title {
+    color: #7f8c8d;
+}
+
+.newsletter-callout .callout-content {
+    line-height: 1.6;
+}
+
+.newsletter-callout .callout-content p:last-child {
+    margin-bottom: 0;
+}

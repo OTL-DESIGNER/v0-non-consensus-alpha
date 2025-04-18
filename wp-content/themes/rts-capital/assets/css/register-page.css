@@ -1,0 +1,37 @@
+.card {
+  border-radius: 12px;
+  background-color: #fff;
+}
+
+.card h2 {
+  font-weight: 700;
+}
+
+.card p {
+  font-size: 16px;
+  color: #555;
+}
+
+.pms-form input,
+.pms-form select {
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.pms-form input[type="submit"] {
+  background-color: #0056b3;
+  color: #fff;
+  padding: 12px 20px;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+
+.pms-form input[type="submit"]:hover {
+  background-color: #004095;
+}

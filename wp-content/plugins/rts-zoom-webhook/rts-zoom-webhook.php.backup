@@ -1,0 +1,188 @@
+<?php
+/*
+Plugin Name: RTS Zoom Webhook
+Plugin URI: https://staging.nonconsesus.com
+Description: Automatically creates webinar posts from Zoom recordings
+Version: 1.0
+Author: RTS Capital Management
+Text Domain: rts-zoom-webhook
+*/
+
+// Exit if accessed directly
+if (!defined('ABSPATH')) {
+    exit;
+}
+// Simple test to verify plugin is loading
+add_action('admin_notices', function() {
+    echo '<div class="notice notice-success"><p>RTS Zoom Webhook plugin is active!</p></div>';
+});
+define('ZOOM_VERIFICATION_TOKEN', 'hIrhtCZrQS6qAzA8Vy1EcA');
+define('ZOOM_SECRET_TOKEN', 'Svl9k970Ri-LXolibblFgA');
+// Register the webhook endpoint
+add_action('rest_api_init', function () {
+    register_rest_route('rts/v1', '/zoom-webhook', array(
+        'methods' => 'POST,GET',  // Only POST for Zoom validation
+        'callback' => 'rts_handle_zoom_webhook',
+        'permission_callback' => '__return_true'
+    ));
+    
+    // Add a test endpoint for debugging
+    register_rest_route('rts/v1', '/test', array(
+        'methods' => 'GET',
+        'callback' => function() {
+            return array('status' => 'API is working!');
+        },
+        'permission_callback' => '__return_true'
+    ));
+});
+
+function rts_handle_zoom_webhook($request) {
+    // Debug every aspect of the request
+    error_log('======= ZOOM WEBHOOK DEBUG START =======');
+    error_log('REQUEST METHOD: ' . $_SERVER['REQUEST_METHOD']);
+    error_log('REQUEST HEADERS: ' . print_r(getallheaders(), true));
+    error_log('REQUEST BODY: ' . $request->get_body());
+    error_log('REQUEST PARAMS: ' . print_r($request->get_params(), true));
+    error_log('RAW INPUT: ' . file_get_contents('php://input'));
+    error_log('======= ZOOM WEBHOOK DEBUG END =======');
+    
+    // Handle both GET and POST methods differently
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        // Handle challenge in GET parameters
+        $data = $request->get_params();
+        if (isset($data['challenge'])) {
+            error_log('GET Challenge received: ' . $data['challenge']);
+            return new WP_REST_Response(array(
+                'plainToken' => $data['challenge']
+            ), 200);
+        }
+        return new WP_REST_Response(array('status' => 'success'), 200);
+    } else {
+        // Handle POST request
+        $body = $request->get_body();
+        $data = json_decode($body, true);
+        
+        // Handle challenge in POST body
+        if (isset($data['challenge'])) {
+            error_log('POST Challenge received: ' . $data['challenge']);
+            return new WP_REST_Response(array(
+                'plainToken' => $data['challenge']
+            ), 200);
+        }
+        
+        // Handle regular webhook events
+        if (isset($data['event'])) {
+            error_log('Zoom event received: ' . $data['event']);
+        }
+        
+        return new WP_REST_Response(array('status' => 'success'), 200);
+    }
+}    
+    
+
+function rts_process_recording($data) {
+    // Extract recording information
+    $meeting_id = $data['payload']['object']['id'] ?? '';
+    $topic = $data['payload']['object']['topic'] ?? 'Untitled Webinar';
+    $recording_files = $data['payload']['object']['recording_files'] ?? [];
+    
+    if (empty($meeting_id) || empty($recording_files)) {
+        error_log('Invalid recording data');
+        return;
+    }
+    
+    // Find if there's an existing webinar post with this meeting ID
+    $existing_posts = get_posts(array(
+        'post_type' => 'webinar',
+        'meta_key' => 'zoom_meeting_id',
+        'meta_value' => $meeting_id,
+        'posts_per_page' => 1
+    ));
+    
+    // Prepare recording URLs
+    $recording_url = '';
+    foreach ($recording_files as $file) {
+        if ($file['file_type'] === 'MP4') {
+            $recording_url = $file['download_url'];
+            break;
+        }
+    }
+    
+    if (empty($recording_url)) {
+        error_log('No MP4 recording found');
+        return;
+    }
+    
+    // Create or update the webinar post
+    if (!empty($existing_posts)) {
+        // Update existing post
+        $post_id = $existing_posts[0]->ID;
+        wp_update_post(array(
+            'ID' => $post_id,
+            'post_status' => 'publish'
+        ));
+    } else {
+        // Create new post
+        $post_id = wp_insert_post(array(
+            'post_title' => $topic,
+            'post_type' => 'webinar',
+            'post_status' => 'publish'
+        ));
+    }
+    
+    // Update the post metadata
+    update_post_meta($post_id, 'zoom_meeting_id', $meeting_id);
+    update_post_meta($post_id, 'webinar_recording', $recording_url);
+    
+    // Set expiration date (2 months from now)
+    $expiration_date = date('Y-m-d', strtotime('+2 months'));
+    update_post_meta($post_id, 'webinar_expiration', $expiration_date);
+    
+    // Auto-restrict to appropriate subscription plans
+    $webinar_plan_id = 11;    // Webinar Access plan ID
+    $bundle_plan_id = 12;     // Complete Bundle plan ID
+    update_post_meta($post_id, 'pms-content-restrict-subscription-plan', array($webinar_plan_id, $bundle_plan_id));
+    
+    error_log("Created/updated webinar post ID: $post_id with recording URL");
+}
+
+// Add an admin menu item
+add_action('admin_menu', 'rts_zoom_webhook_menu');
+
+function rts_zoom_webhook_menu() {
+    add_options_page(
+        'RTS Zoom Webhook',
+        'RTS Zoom Webhook',
+        'manage_options',
+        'rts-zoom-webhook',
+        'rts_zoom_webhook_page'
+    );
+}
+
+// Admin page
+function rts_zoom_webhook_page() {
+    ?>
+    <div class="wrap">
+        <h1>RTS Zoom Webhook</h1>
+        <p>This plugin provides a webhook endpoint for Zoom at:</p>
+        <code><?php echo site_url('/wp-json/rts/v1/zoom-webhook'); ?></code>
+        <p>Use this URL in your Zoom app webhook configuration.</p>
+        <p>Test endpoint: <a href="<?php echo site_url('/wp-json/rts/v1/test'); ?>" target="_blank"><?php echo site_url('/wp-json/rts/v1/test'); ?></a></p>
+        
+        <h2>Usage</h2>
+        <p>When a Zoom webinar recording is completed, this plugin will:</p>
+        <ol>
+            <li>Create a new webinar post (or update an existing one)</li>
+            <li>Add the recording URL to the post</li>
+            <li>Set expiration date (2 months from recording date)</li>
+            <li>Automatically restrict access to "Webinar Access" and "Complete Access Bundle" subscriptions</li>
+        </ol>
+        
+        <h2>Webhook Events</h2>
+        <p>Subscribe to the following Zoom webhook events:</p>
+        <ul>
+            <li><strong>recording.completed</strong> - Triggered when a recording is available</li>
+        </ul>
+    </div>
+    <?php
+}

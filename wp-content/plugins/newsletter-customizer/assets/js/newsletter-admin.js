@@ -1,0 +1,255 @@
+/**
+ * RTS Newsletter Enhancer Admin JavaScript
+ */
+(function($) {
+    'use strict';
+    
+    // Initialize when document is ready
+    $(document).ready(function() {
+        // Template selection
+        initTemplateSelector();
+        
+        // Preview functionality
+        initPreviewButton();
+        
+        // Color picker fields
+        initColorPickers();
+        
+        // Listen for changes to template options
+        initOptionChangeListeners();
+    });
+    
+    /**
+     * Initialize template selector functionality
+     */
+    function initTemplateSelector() {
+        var templateSelect = $('#rts_newsletter_template');
+        
+        if (templateSelect.length === 0) {
+            return;
+        }
+        
+        // Update template preview on change
+        templateSelect.on('change', function() {
+            var selectedTemplate = $(this).val();
+            
+            // Hide all previews and show the selected one
+            $('.template-preview').removeClass('active');
+            $('.template-preview[data-template="' + selectedTemplate + '"]').addClass('active');
+            
+            // Load template-specific options
+            loadTemplateOptions(selectedTemplate);
+            
+            // Update hidden field for saving the template selection
+            $('#_rts_newsletter_template').val(selectedTemplate);
+        });
+        
+        // Initial load of template options
+        loadTemplateOptions(templateSelect.val());
+        
+        // If no preview is active, activate the one for the selected template
+        if ($('.template-preview.active').length === 0) {
+            $('.template-preview[data-template="' + templateSelect.val() + '"]').addClass('active');
+        }
+    }
+    
+    /**
+     * Load template-specific options
+     */
+    function loadTemplateOptions(template) {
+        // Get template options from localized script
+        var templates = rtsNewsletter.templates || {};
+        var options = templates[template] ? templates[template].options : null;
+        
+        // Clear options container
+        var optionsContainer = $('#rts-template-options');
+        optionsContainer.empty();
+        
+        // If no options, hide container and return
+        if (!options || Object.keys(options).length === 0) {
+            optionsContainer.addClass('hidden');
+            return;
+        }
+        
+        // Build options interface
+        var optionsHtml = '<h4>' + rtsNewsletter.i18n.template_options + '</h4>';
+        
+        // Loop through options and create form fields
+        for (var key in options) {
+            if (options.hasOwnProperty(key)) {
+                var option = options[key];
+                var fieldId = 'rts_template_' + template + '_' + key;
+                var fieldName = fieldId;
+                var fieldValue = $('#' + fieldId).val() || option.default;
+                
+                optionsHtml += '<div class="template-option">';
+                optionsHtml += '<label for="' + fieldId + '">' + option.label + ':</label>';
+                
+                // Different field types
+                switch (option.type) {
+                    case 'color':
+                        optionsHtml += '<input type="color" id="' + fieldId + '" name="' + fieldName + '" value="' + fieldValue + '" class="color-picker" />';
+                        break;
+                        
+                    case 'checkbox':
+                        var checked = fieldValue ? 'checked="checked"' : '';
+                        optionsHtml += '<input type="checkbox" id="' + fieldId + '" name="' + fieldName + '" value="1" ' + checked + ' />';
+                        break;
+                        
+                    case 'select':
+                        optionsHtml += '<select id="' + fieldId + '" name="' + fieldName + '">';
+                        for (var optVal in option.options) {
+                            if (option.options.hasOwnProperty(optVal)) {
+                                var selected = (fieldValue === optVal) ? 'selected="selected"' : '';
+                                optionsHtml += '<option value="' + optVal + '" ' + selected + '>' + option.options[optVal] + '</option>';
+                            }
+                        }
+                        optionsHtml += '</select>';
+                        break;
+                        
+                    default:
+                        optionsHtml += '<input type="text" id="' + fieldId + '" name="' + fieldName + '" value="' + fieldValue + '" />';
+                }
+                
+                optionsHtml += '</div>';
+            }
+        }
+        
+        // Add options to container and show
+        optionsContainer.html(optionsHtml).removeClass('hidden');
+        
+        // Initialize color pickers if they exist
+        if (optionsContainer.find('.color-picker').length > 0) {
+            initColorPickers();
+        }
+    }
+    
+    /**
+     * Initialize preview button functionality
+     */
+    function initPreviewButton() {
+        var previewButton = $('#rts-newsletter-preview');
+        
+        if (previewButton.length === 0) {
+            return;
+        }
+        
+        previewButton.on('click', function(e) {
+            e.preventDefault();
+            
+            // Get current post data
+            var postId = $('#post_ID').val();
+            var title = $('#title').val();
+            var content = '';
+            
+            // Get content from editor
+            if (typeof tinyMCE !== 'undefined' && tinyMCE.get('content')) {
+                content = tinyMCE.get('content').getContent();
+            } else {
+                content = $('#content').val();
+            }
+            
+            // Get selected template
+            var template = $('#rts_newsletter_template').val() || 'default';
+            
+            // Show loading indicator
+            previewButton.prop('disabled', true).text('Loading preview...');
+            
+            // Gather template options
+            var templateOptions = {};
+            $('#rts-template-options input, #rts-template-options select').each(function() {
+                var optionName = $(this).attr('name');
+                var optionValue = $(this).is(':checkbox') ? $(this).is(':checked') : $(this).val();
+                templateOptions[optionName] = optionValue;
+            });
+            
+            // Send AJAX request
+            $.ajax({
+                url: rtsNewsletter.ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'rts_newsletter_preview',
+                    nonce: rtsNewsletter.nonce,
+                    post_id: postId,
+                    title: title,
+                    content: content,
+                    template: template,
+                    template_options: templateOptions
+                },
+                success: function(response) {
+                    if (response.success && response.data.html) {
+                        // Create preview modal
+                        var modal = $('<div class="rts-preview-modal"></div>');
+                        var modalContent = $('<div class="rts-preview-content"></div>').html(response.data.html);
+                        var closeButton = $('<button class="rts-preview-close">×</button>').on('click', function() {
+                            modal.remove();
+                        });
+                        
+                        // Add ESC key to close
+                        $(document).on('keydown.rts-preview', function(e) {
+                            if (e.keyCode === 27) { // ESC
+                                modal.remove();
+                                $(document).off('keydown.rts-preview');
+                            }
+                        });
+                        
+                        // Append to body
+                        modal.append(closeButton).append(modalContent).appendTo('body');
+                    } else {
+                        alert(rtsNewsletter.i18n.error);
+                    }
+                    
+                    // Reset button
+                    previewButton.prop('disabled', false).text(rtsNewsletter.i18n.preview);
+                },
+                error: function() {
+                    alert(rtsNewsletter.i18n.error);
+                    previewButton.prop('disabled', false).text(rtsNewsletter.i18n.preview);
+                }
+            });
+        });
+    }
+    
+    /**
+     * Initialize color picker fields
+     */
+    function initColorPickers() {
+        // Check if wp-color-picker exists
+        if ($.fn.wpColorPicker) {
+            $('.color-picker').wpColorPicker({
+                change: function(event, ui) {
+                    // Update the color picker value
+                    $(this).val(ui.color.toString());
+                    $(this).trigger('change');
+                }
+            });
+        }
+    }
+    
+    /**
+     * Initialize option change listeners
+     */
+    function initOptionChangeListeners() {
+        // Listen for changes to template options
+        $(document).on('change', '#rts-template-options input, #rts-template-options select', function() {
+            // Get the option name and value
+            var optionName = $(this).attr('name');
+            var optionValue = $(this).is(':checkbox') ? $(this).is(':checked') : $(this).val();
+            
+            // Store the value in a hidden field for saving
+            var hiddenField = $('#_' + optionName);
+            if (hiddenField.length === 0) {
+                // Create a hidden field if it doesn't exist
+                $('<input>').attr({
+                    type: 'hidden',
+                    id: '_' + optionName,
+                    name: '_' + optionName,
+                    value: optionValue
+                }).appendTo('#post');
+            } else {
+                // Update the existing hidden field
+                hiddenField.val(optionValue);
+            }
+        });
+    }
+})(jQuery);

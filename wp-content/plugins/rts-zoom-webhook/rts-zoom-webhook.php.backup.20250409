@@ -1,0 +1,603 @@
+<?php
+/*
+Plugin Name: RTS Zoom Webhook
+Plugin URI: https://nonconsesus.com
+Description: Automatically creates webinar posts from Zoom recordings
+Version: 1.0
+Author: RTS Capital Management
+Text Domain: rts-zoom-webhook
+*/
+
+// Exit if accessed directly
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+// Register the Zapier webhook endpoint
+add_action('rest_api_init', function () {
+    register_rest_route('rts/v1', '/zapier-webhook', array(
+        'methods' => 'POST',
+        'callback' => 'rts_handle_zapier_webhook',
+        'permission_callback' => function() {
+            // You might want to add authentication here later
+            return true;
+        }
+    ));
+    
+    // Add a test endpoint for debugging
+    register_rest_route('rts/v1', '/test', array(
+        'methods' => 'GET',
+        'callback' => function() {
+            return array('status' => 'API is working!');
+        },
+        'permission_callback' => '__return_true'
+    ));
+
+    // Direct Zoom webhook endpoint (optional alternative to Zapier)
+    register_rest_route('rts/v1', '/zoom-webhook', array(
+        'methods' => 'POST',
+        'callback' => 'rts_handle_zoom_webhook',
+        'permission_callback' => '__return_true'
+    ));
+});
+
+// Handle the webhook from Zapier
+function rts_handle_zapier_webhook($request) {
+    // Enhanced debugging - log everything
+    error_log('======= ZAPIER WEBHOOK DEBUG START =======');
+    error_log('REQUEST METHOD: ' . $_SERVER['REQUEST_METHOD']);
+    error_log('REQUEST HEADERS: ' . print_r(getallheaders(), true));
+    error_log('RAW REQUEST BODY: ' . file_get_contents('php://input'));
+    
+    // Get the raw request body and parse it as JSON
+    $body = $request->get_body();
+    $data = json_decode($body, true);
+    
+    // Fallback to request params if JSON parsing failed
+    if (json_last_error() !== JSON_ERROR_NONE || empty($data)) {
+        $data = $request->get_params();
+    }
+    
+    error_log('PROCESSED DATA: ' . print_r($data, true));
+    
+    // Create debug post to track webhook data
+    $debug_post_id = wp_insert_post(array(
+        'post_title' => 'Webhook Debug: ' . date('Y-m-d H:i:s'),
+        'post_type' => 'webinar',
+        'post_status' => 'draft',
+        'post_content' => 'Debug data: ' . print_r($data, true)
+    ));
+    
+    error_log('Created debug post ID: ' . $debug_post_id);
+    
+    // Process the webhook data
+    $meeting_id = '';
+    $topic = 'Untitled Webinar';
+    $video_url = '';
+    $password = '';
+    
+    // Extract meeting ID from payload_object_id (as shown in your Zapier config)
+    if (isset($data['payload_object_id'])) {
+        $meeting_id = $data['payload_object_id'];
+        error_log("Found meeting ID: $meeting_id");
+    }
+    
+    // Extract topic from payload_object_topic (as shown in your Zapier config)
+    if (isset($data['payload_object_topic'])) {
+        $topic = $data['payload_object_topic'];
+        error_log("Found topic: $topic");
+    }
+    
+    // Extract password - look for various possible field names
+    $password_field_options = array(
+        'Password', 'password', 'passcode', 'Passcode', 
+        'recording_password', 'webinar_password', 
+        'share_password', 'share_passcode'
+    );
+    
+    foreach ($password_field_options as $field) {
+        if (isset($data[$field]) && !empty($data[$field])) {
+            $password = $data[$field];
+            error_log("Found recording password: $password");
+            break;
+        }
+    }
+    
+    // Look for Share URL (as shown in your Zapier config)
+    if (isset($data['1. Share URL:']) || isset($data['1. Share URL'])) {
+        // Handle potential variation in key name with or without colon
+        $share_url_key = isset($data['1. Share URL:']) ? '1. Share URL:' : '1. Share URL';
+        $video_url = $data[$share_url_key];
+        error_log("SUCCESS: Found Share URL: $video_url");
+    }
+    
+    // Fallback: Try other common fields for the URL
+    if (empty($video_url)) {
+        $possible_keys = array(
+            'share_url',
+            'download_url',
+            '1. Share URL',
+            'Share URL'
+        );
+        
+        foreach ($possible_keys as $key) {
+            if (isset($data[$key]) && !empty($data[$key])) {
+                $video_url = $data[$key];
+                error_log("SUCCESS: Found URL in field '$key': $video_url");
+                break;
+            }
+        }
+    }
+    
+    // If we have a video URL, create a webinar post
+    if (!empty($video_url)) {
+        $post_id = wp_insert_post(array(
+            'post_title' => $topic,
+            'post_type' => 'webinar',
+            'post_status' => 'publish',
+            'post_content' => 'This webinar recording was automatically created from a Zoom webinar.'
+        ));
+        
+        if (!is_wp_error($post_id)) {
+            // Update post metadata
+            update_post_meta($post_id, 'zoom_meeting_id', $meeting_id);
+            update_post_meta($post_id, 'webinar_recording', $video_url);
+            update_post_meta($post_id, 'webinar_date', current_time('mysql'));
+            
+            // Save the password if we found one
+            if (!empty($password)) {
+                update_post_meta($post_id, 'webinar_password', $password);
+                error_log("Saved recording password: $password");
+            }
+            
+            // Set expiration date (2 months from now)
+            $expiration_date = date('Y-m-d', strtotime('+2 months'));
+            update_post_meta($post_id, 'webinar_expiration', $expiration_date);
+            
+            error_log('SUCCESS! Created webinar post ID: ' . $post_id . ' with video URL: ' . $video_url);
+            
+            // Update the debug post with success info
+            $debug_content = "Successfully created webinar post #$post_id with URL: $video_url\n\n";
+            if (!empty($password)) {
+                $debug_content .= "Password: $password\n\n";
+            }
+            $debug_content .= "Raw data: " . print_r($data, true);
+            
+            wp_update_post(array(
+                'ID' => $debug_post_id,
+                'post_title' => 'Webhook Success: ' . $topic,
+                'post_content' => $debug_content
+            ));
+        } else {
+            error_log('ERROR: Failed to create webinar post: ' . $post_id->get_error_message());
+            
+            // Update debug post with error
+            wp_update_post(array(
+                'ID' => $debug_post_id,
+                'post_title' => 'Webhook Error: Post Creation Failed',
+                'post_content' => "Error: " . $post_id->get_error_message() . "\n\nRaw data: " . print_r($data, true)
+            ));
+        }
+    } else {
+        error_log('ERROR: No video URL found in webhook data');
+        
+        // Update debug post with error
+        wp_update_post(array(
+            'ID' => $debug_post_id,
+            'post_title' => 'Webhook Error: No Video URL',
+            'post_content' => "Error: Could not find video URL in data\n\nRaw data: " . print_r($data, true)
+        ));
+    }
+    
+    error_log('======= ZAPIER WEBHOOK DEBUG END =======');
+    
+    // Always return success to Zapier
+    return new WP_REST_Response(array(
+        'status' => 'success',
+        'message' => 'Webhook received'
+    ), 200);
+}
+
+// Handle direct webhook from Zoom (alternative to Zapier)
+function rts_handle_zoom_webhook($request) {
+    error_log('======= ZOOM WEBHOOK DEBUG START =======');
+    error_log('REQUEST BODY: ' . $request->get_body());
+    error_log('REQUEST PARAMS: ' . print_r($request->get_params(), true));
+    error_log('======= ZOOM WEBHOOK DEBUG END =======');
+    
+    $data = json_decode($request->get_body(), true);
+    
+    // Zoom sends a verification challenge when setting up the webhook
+    if (isset($data['event']) && $data['event'] === 'endpoint.url_validation') {
+        return new WP_REST_Response(array(
+            'plainToken' => $data['payload']['plainToken']
+        ), 200);
+    }
+    
+    // Process recording completed event
+    if (isset($data['event']) && $data['event'] === 'recording.completed') {
+        rts_process_recording($data);
+        error_log('Recording completed event processed directly from Zoom');
+    } else {
+        error_log('Unhandled Zoom event type or missing event data');
+    }
+    
+    return new WP_REST_Response(array('status' => 'success'), 200);
+}
+
+// Process the recording data and create a webinar post
+function rts_process_recording($data) {
+    // Extract recording information
+    $meeting_id = isset($data['payload']['object']['id']) ? $data['payload']['object']['id'] : '';
+    $topic = isset($data['payload']['object']['topic']) ? $data['payload']['object']['topic'] : 'Untitled Webinar';
+    $recording_files = isset($data['payload']['object']['recording_files']) ? $data['payload']['object']['recording_files'] : array();
+    
+    // Log data for debugging
+    error_log('Processing recording for meeting ID: ' . $meeting_id);
+    error_log('Topic: ' . $topic);
+    error_log('Recording files: ' . json_encode($recording_files));
+    
+    if (empty($meeting_id)) {
+        error_log('Missing meeting ID, generating a random one');
+        $meeting_id = 'auto_' . uniqid();
+    }
+    
+    if (empty($recording_files)) {
+        error_log('No recording files found in the data');
+        
+        // Look for MP4 file URL in the raw data
+        if (isset($data['download_url']) && !empty($data['download_url'])) {
+            error_log('Found direct download_url in data');
+            $recording_files = array(
+                array(
+                    'file_type' => 'MP4',
+                    'download_url' => $data['download_url']
+                )
+            );
+        } else {
+            // Try to find any URL in the data that might be a recording
+            foreach ($data as $key => $value) {
+                if (is_string($value) && 
+                    stripos($value, 'http') === 0 && 
+                    (stripos($value, 'zoom.us') !== false || stripos($value, 'recording') !== false || stripos($value, 'video') !== false)) {
+                    error_log('Found potential recording URL in field: ' . $key);
+                    $recording_files = array(
+                        array(
+                            'file_type' => 'MP4',
+                            'download_url' => $value
+                        )
+                    );
+                    break;
+                }
+            }
+        }
+    }
+    
+    if (empty($recording_files)) {
+        error_log('Could not find any recording files or URLs in the data');
+        return;
+    }
+    
+    // Prepare recording URLs
+    $recording_url = '';
+    $mp4_found = false;
+    
+    // First pass: try to find MP4 file
+    foreach ($recording_files as $file) {
+        if (isset($file['file_type']) && $file['file_type'] === 'MP4' && isset($file['download_url'])) {
+            $recording_url = $file['download_url'];
+            $mp4_found = true;
+            break;
+        }
+    }
+    
+    // Second pass: if no MP4, use any available recording
+    if (!$mp4_found) {
+        foreach ($recording_files as $file) {
+            if (isset($file['download_url'])) {
+                $recording_url = $file['download_url'];
+                break;
+            }
+        }
+    }
+    
+    if (empty($recording_url)) {
+        error_log('No recording URL found in any of the files');
+        return;
+    }
+    
+    // Create or update the webinar post
+    $existing_posts = get_posts(array(
+        'post_type' => 'webinar',
+        'meta_key' => 'zoom_meeting_id',
+        'meta_value' => $meeting_id,
+        'posts_per_page' => 1
+    ));
+    
+    if (!empty($existing_posts)) {
+        // Update existing post
+        $post_id = $existing_posts[0]->ID;
+        wp_update_post(array(
+            'ID' => $post_id,
+            'post_status' => 'publish'
+        ));
+        error_log("Updating existing webinar post: $post_id");
+    } else {
+        // Create new post
+        $post_id = wp_insert_post(array(
+            'post_title' => $topic,
+            'post_type' => 'webinar',
+            'post_status' => 'publish',
+            'post_content' => 'This webinar recording was automatically created from a Zoom webinar.'
+        ));
+        error_log("Created new webinar post: $post_id");
+    }
+    
+    if (!$post_id || is_wp_error($post_id)) {
+        error_log('Failed to create/update webinar post: ' . (is_wp_error($post_id) ? $post_id->get_error_message() : 'Unknown error'));
+        return;
+    }
+    
+    // Update the post metadata
+    update_post_meta($post_id, 'zoom_meeting_id', $meeting_id);
+    update_post_meta($post_id, 'webinar_recording', $recording_url);
+    update_post_meta($post_id, 'webinar_date', current_time('mysql'));
+    
+    // Set expiration date (2 months from now)
+    $expiration_date = date('Y-m-d', strtotime('+2 months'));
+    update_post_meta($post_id, 'webinar_expiration', $expiration_date);
+    
+    // Auto-restrict to appropriate subscription plans (adjust IDs as needed)
+    $webinar_plan_id = 11;    // Webinar Access plan ID
+    $bundle_plan_id = 12;     // Complete Bundle plan ID
+    update_post_meta($post_id, 'pms-content-restrict-subscription-plan', array($webinar_plan_id, $bundle_plan_id));
+    
+    error_log("WEBINAR POST CREATED/UPDATED: Post ID $post_id with recording URL: $recording_url");
+
+    // Attempt to send notification to Zapier about successful processing
+    $zapier_catch_url = get_option('rts_zapier_webhook_url', '');
+    if (!empty($zapier_catch_url)) {
+        wp_remote_post($zapier_catch_url, array(
+            'body' => json_encode(array(
+                'event' => 'webinar_post_created',
+                'post_id' => $post_id,
+                'meeting_id' => $meeting_id,
+                'topic' => $topic,
+                'recording_url' => $recording_url
+            )),
+            'headers' => array('Content-Type' => 'application/json'),
+            'timeout' => 15
+        ));
+    }
+}
+
+// Register settings
+add_action('admin_init', 'rts_zoom_webhook_register_settings');
+
+function rts_zoom_webhook_register_settings() {
+    register_setting('rts_zoom_webhook_options', 'rts_zapier_webhook_url');
+}
+
+// Add an admin menu item
+add_action('admin_menu', 'rts_zoom_webhook_menu');
+
+function rts_zoom_webhook_menu() {
+    add_options_page(
+        'RTS Zoom-Zapier Webhook',
+        'RTS Zoom-Zapier Webhook',
+        'manage_options',
+        'rts-zoom-webhook',
+        'rts_zoom_webhook_page'
+    );
+}
+
+// Admin page
+function rts_zoom_webhook_page() {
+    // Save URL if submitted
+    if (isset($_POST['rts_zapier_webhook_url'])) {
+        update_option('rts_zapier_webhook_url', sanitize_text_field($_POST['rts_zapier_webhook_url']));
+        echo '<div class="notice notice-success is-dismissible"><p>Settings saved successfully!</p></div>';
+    }
+    
+    // Get currently saved URL
+    $webhook_url = get_option('rts_zapier_webhook_url', '');
+    ?>
+    <div class="wrap">
+        <h1>RTS Zoom-Zapier Webhook</h1>
+        
+        <form method="post" action="">
+            <div class="card" style="max-width: 800px; padding: 20px; margin-bottom: 20px;">
+                <h2>Zapier Webhook URL</h2>
+                <p>Enter your Zapier Catch Hook URL below:</p>
+                <input type="text" name="rts_zapier_webhook_url" value="<?php echo esc_attr($webhook_url); ?>" style="width: 100%;" placeholder="https://hooks.zapier.com/hooks/catch/XXXXX/XXXXX/" />
+                <p><input type="submit" class="button button-primary" value="Save Settings" /></p>
+                
+                <?php if (empty($webhook_url)) : ?>
+                    <div class="notice notice-warning" style="margin: 10px 0;">
+                        <p><strong>Important:</strong> You need to configure your Zapier webhook URL above for automatic webinar creation to work.</p>
+                    </div>
+                <?php else : ?>
+                    <div class="notice notice-info" style="margin: 10px 0;">
+                        <p><strong>Current Webhook URL:</strong> <?php echo esc_html($webhook_url); ?></p>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </form>
+        
+        <?php if (!empty($webhook_url)) : ?>
+        <div class="card" style="max-width: 800px; padding: 20px; margin-bottom: 20px;">
+            <h2>Test Connection</h2>
+            <p>Click the button below to send a test message to Zapier:</p>
+            <button id="test-zapier" class="button button-secondary">Send Test to Zapier</button>
+            <div id="test-result" style="margin-top: 10px; padding: 10px; display: none;"></div>
+            
+            <script>
+            jQuery(document).ready(function($) {
+                $('#test-zapier').on('click', function() {
+                    $(this).prop('disabled', true).text('Sending...');
+                    $('#test-result').hide();
+                    
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        data: {
+                            action: 'rts_test_zapier_connection',
+                            nonce: '<?php echo wp_create_nonce('rts_test_zapier'); ?>'
+                        },
+                        success: function(response) {
+                            $('#test-zapier').prop('disabled', false).text('Send Test to Zapier');
+                            if (response.success) {
+                                $('#test-result').html(response.data).show().addClass('notice notice-success').removeClass('notice-error');
+                            } else {
+                                $('#test-result').html('Error: ' + response.data).show().addClass('notice notice-error').removeClass('notice-success');
+                            }
+                        },
+                        error: function() {
+                            $('#test-zapier').prop('disabled', false).text('Send Test to Zapier');
+                            $('#test-result').html('Error: Could not send test. Please check your settings.').show().addClass('notice notice-error').removeClass('notice-success');
+                        }
+                    });
+                });
+            });
+            </script>
+        </div>
+        <?php endif; ?>
+        
+        <div class="card" style="max-width: 800px; padding: 20px; margin-bottom: 20px;">
+            <h2>WordPress REST API Endpoints</h2>
+            <p>Use these URLs in your webhook configurations:</p>
+            
+            <h4>Option 1: For Zapier</h4>
+            <p>Use this URL in your Zapier action step to send data to WordPress:</p>
+            <code style="display: block; padding: 10px; background: #f5f5f5; margin: 15px 0;"><?php echo site_url('/wp-json/rts/v1/zapier-webhook'); ?></code>
+            
+            <h4>Option 2: Direct Zoom Webhook (Alternative)</h4>
+            <p>For direct integration with Zoom (bypassing Zapier):</p>
+            <code style="display: block; padding: 10px; background: #f5f5f5; margin: 15px 0;"><?php echo site_url('/wp-json/rts/v1/zoom-webhook'); ?></code>
+        </div>
+        
+        <div class="card" style="max-width: 800px; padding: 20px; margin-bottom: 20px;">
+            <h2>Setup Instructions</h2>
+            
+            <div style="margin-bottom: 30px;">
+                <h3>Option 1: Using Zapier (Recommended)</h3>
+                <h4>Step 1: Configure Zoom Webhook in Zapier</h4>
+                <ol>
+                    <li>Go to <a href="https://zapier.com" target="_blank">Zapier.com</a> and create an account if you don't have one</li>
+                    <li>Create a new Zap</li>
+                    <li>For the Trigger app, select "Zoom"</li>
+                    <li>Choose "Recording Completed" as the trigger event</li>
+                    <li>Connect your Zoom account and configure the trigger</li>
+                    <li>Test the trigger to ensure it's working</li>
+                </ol>
+                
+                <h4>Step 2: Configure Zapier to send data to WordPress</h4>
+                <ol>
+                    <li>Add an Action step to your Zap</li>
+                    <li>Select "Webhooks by Zapier" as the Action app</li>
+                    <li>Choose "POST" as the Action event</li>
+                    <li>In the URL field, enter: <code><?php echo site_url('/wp-json/rts/v1/zapier-webhook'); ?></code></li>
+                    <li>Set Payload Type to "JSON"</li>
+                    <li>Configure the data payload:</li>
+                    <pre style="background: #f5f5f5; padding: 10px; margin: 5px 0; overflow: auto;">
+{
+  "event": "recording.completed",
+  "payload": {
+    "object": {
+      "id": "{{id}}",
+      "topic": "{{topic}}",
+      "recording_files": {{recording_files}}
+    }
+  }
+}</pre>
+                    <li>For Headers, add: <code>Content-Type: application/json</code></li>
+                    <li>Test the Zap and turn it on if successful</li>
+                </ol>
+            </div>
+            
+            <div>
+                <h3>Option 2: Direct Zoom Integration (Advanced)</h3>
+                <ol>
+                    <li>Go to <a href="https://marketplace.zoom.us" target="_blank">Zoom Marketplace</a> and log in</li>
+                    <li>Create a new app of type "Webhook Only"</li>
+                    <li>In "Feature" → "Event Subscriptions", add endpoint URL:
+                        <code><?php echo site_url('/wp-json/rts/v1/zoom-webhook'); ?></code>
+                    </li>
+                    <li>Subscribe to the "recording.completed" event</li>
+                    <li>Save your changes and activate the app</li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="card" style="max-width: 800px; padding: 20px; margin-bottom: 20px;">
+            <h2>Debugging</h2>
+            <p>If you're having issues with the webhook integration, check the following:</p>
+            <ol>
+                <li>Ensure your Zapier webhook URL is correctly configured above</li>
+                <li>Verify your Zoom account is properly connected to Zapier</li>
+                <li>Check WordPress error logs for any issues during webhook processing</li>
+                <li>Test the API with this URL: <a href="<?php echo site_url('/wp-json/rts/v1/test'); ?>" target="_blank"><?php echo site_url('/wp-json/rts/v1/test'); ?></a></li>
+            </ol>
+            
+            <p><strong>Recent logs:</strong></p>
+            <div style="background: #f5f5f5; padding: 10px; max-height: 200px; overflow: auto;">
+                <?php
+                $log_file = WP_CONTENT_DIR . '/debug.log';
+                if (file_exists($log_file) && is_readable($log_file)) {
+                    $logs = file_get_contents($log_file, false, null, -10000); // Get last 10KB of log
+                    $logs = array_filter(explode("\n", $logs), function($line) {
+                        return strpos($line, 'ZAPIER WEBHOOK') !== false || strpos($line, 'ZOOM WEBHOOK') !== false;
+                    });
+                    
+                    if (!empty($logs)) {
+                        echo '<pre>' . esc_html(implode("\n", $logs)) . '</pre>';
+                    } else {
+                        echo '<p>No relevant log entries found.</p>';
+                    }
+                } else {
+                    echo '<p>Debug log not accessible. Make sure WP_DEBUG and WP_DEBUG_LOG are enabled in wp-config.php.</p>';
+                }
+                ?>
+            </div>
+        </div>
+    </div>
+    <?php
+}
+
+// AJAX handler for testing Zapier connection
+add_action('wp_ajax_rts_test_zapier_connection', 'rts_test_zapier_connection');
+
+function rts_test_zapier_connection() {
+    // Verify nonce
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'rts_test_zapier')) {
+        wp_send_json_error('Security check failed');
+    }
+    
+    $webhook_url = get_option('rts_zapier_webhook_url', '');
+    
+    if (empty($webhook_url)) {
+        wp_send_json_error('Webhook URL not configured');
+    }
+    
+    // Send test data to Zapier
+    $response = wp_remote_post($webhook_url, array(
+        'body' => json_encode(array(
+            'test' => true,
+            'message' => 'This is a test from RTS Zoom Webhook plugin',
+            'timestamp' => current_time('mysql')
+        )),
+        'headers' => array('Content-Type' => 'application/json'),
+        'timeout' => 15
+    ));
+    
+    if (is_wp_error($response)) {
+        wp_send_json_error($response->get_error_message());
+    } else {
+        $code = wp_remote_retrieve_response_code($response);
+        if ($code >= 200 && $code < 300) {
+            wp_send_json_success('Test sent successfully! Check your Zapier account to see if it was received.');
+        } else {
+            wp_send_json_error('Received unexpected response code: ' . $code);
+        }
+    }
+}

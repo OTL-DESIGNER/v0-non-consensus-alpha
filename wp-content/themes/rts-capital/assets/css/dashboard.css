@@ -1,0 +1,899 @@
+/**
+ * RTS Capital - Member Dashboard Styles (Premium Edition)
+ * 
+ * Comprehensive stylesheet for professional member dashboard
+ */
+
+/* ========== Page & Container ========== */
+.member-dashboard-page .site-content {
+    background-color: #f5f7fa;
+    padding: 30px 0;
+}
+
+.member-dashboard-page .container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.member-dashboard-page .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -15px;
+    width: 100%;
+}
+
+.member-dashboard-page .col-md-12 {
+    position: relative;
+    width: 100%;
+    padding: 0 15px;
+    flex: 0 0 100%;
+    max-width: 100%;
+}
+
+/* ========== Dashboard Container ========== */
+.rts-dashboard {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.07);
+    padding: 40px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* ========== Dashboard Header ========== */
+.dashboard-header {
+    margin-bottom: 40px;
+    border-bottom: 1px solid #eef1f5;
+    padding-bottom: 25px;
+    text-align: center;
+    position: relative;
+}
+
+.dashboard-header:before {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 3px;
+    background: linear-gradient(90deg, #1abc9c, #16a085);
+    border-radius: 3px;
+}
+
+.dashboard-header h1 {
+    font-size: 2.4rem;
+    margin-bottom: 12px;
+    color: #2c3e50;
+    font-weight: 700;
+}
+
+.welcome-message {
+    font-size: 1.15rem;
+    color: #666;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* ========== Dashboard Sections ========== */
+.dashboard-section {
+    margin-bottom: 50px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid #eef1f5;
+    width: 100%;
+}
+
+.dashboard-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.dashboard-section h2 {
+    font-size: 1.6rem;
+    margin-bottom: 30px;
+    color: #2c3e50;
+    position: relative;
+    padding-bottom: 15px;
+    text-align: center;
+    font-weight: 700;
+}
+
+.dashboard-section h2:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, #1abc9c, #16a085);
+    border-radius: 3px;
+}
+
+/* ========== Subscription Section ========== */
+.subscription-section {
+    margin-bottom: 50px;
+}
+
+.subscription-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.subscription-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f9fafc;
+    border-radius: 10px;
+    padding: 25px;
+    border-left: 5px solid #1abc9c;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0 auto;
+}
+
+.subscription-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.subscription-item.inactive {
+    border-left-color: #e74c3c;
+    opacity: 0.8;
+}
+
+.subscription-name {
+    flex: 1;
+}
+
+.subscription-name h3 {
+    font-size: 1.3rem;
+    margin: 0 0 8px 0;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.subscription-expires,
+.subscription-active,
+.subscription-inactive {
+    font-size: 0.95rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.subscription-expires:before,
+.subscription-active:before,
+.subscription-inactive:before {
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    margin-right: 8px;
+}
+
+.subscription-active {
+    color: #1abc9c;
+    font-weight: 500;
+}
+
+.subscription-active:before {
+    content: '\f058'; /* check-circle */
+    color: #1abc9c;
+}
+
+.subscription-inactive {
+    color: #e74c3c;
+    font-weight: 500;
+}
+
+.subscription-inactive:before {
+    content: '\f057'; /* times-circle */
+    color: #e74c3c;
+}
+
+.subscription-expires:before {
+    content: '\f073'; /* calendar */
+    color: #7f8c8d;
+}
+
+.subscription-actions {
+    flex-shrink: 0;
+    margin-left: 20px;
+}
+
+.no-subscriptions-message {
+    background-color: #f9fafc;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+    border: 1px dashed #ddd;
+}
+
+.no-subscriptions-message p {
+    margin-bottom: 25px;
+    color: #666;
+    font-size: 1.05rem;
+}
+
+/* ========== Upgrade Section ========== */
+.upgrade-section {
+    text-align: center;
+    background-color: #f5f9fc;
+    padding: 35px;
+    border-radius: 12px;
+    margin: 40px auto;
+    max-width: 1000px;
+}
+
+.upgrade-section > p {
+    max-width: 700px;
+    margin: 0 auto 30px;
+    color: #555;
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
+
+.upgrade-options {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 900px;
+}
+
+.upgrade-option {
+    background-color: white;
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #eef1f5;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.upgrade-option:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.upgrade-option h3 {
+    font-size: 1.5rem;
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.upgrade-price {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1abc9c;
+    margin: 20px 0;
+}
+
+.price-duration {
+    font-size: 1rem;
+    color: #666;
+    font-weight: 400;
+}
+
+.upgrade-description {
+    color: #666;
+    margin-bottom: 25px;
+    font-size: 1rem;
+    line-height: 1.5;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ========== Content Items (Newsletters, Webinars) ========== */
+.content-list,
+.webinar-list,
+.recording-list {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.content-item,
+.webinar-item,
+.recording-item {
+    display: flex;
+    flex-direction: column;
+    background-color: #f9fafc;
+    border-radius: 10px;
+    padding: 25px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #eee;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.content-item:hover,
+.webinar-item:hover,
+.recording-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.content-item-details,
+.webinar-item-details,
+.recording-item-details {
+    flex-grow: 1;
+    margin-bottom: 20px;
+}
+
+.content-item h3,
+.webinar-item h3,
+.recording-item h3 {
+    font-size: 1.3rem;
+    margin: 0 0 12px 0;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.content-item h3 a,
+.webinar-item h3 a,
+.recording-item h3 a {
+    color: #2c3e50;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.content-item h3 a:hover,
+.webinar-item h3 a:hover,
+.recording-item h3 a:hover {
+    color: #1abc9c;
+}
+
+.content-meta,
+.webinar-meta,
+.recording-meta {
+    display: flex;
+    gap: 20px;
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.content-date,
+.webinar-date,
+.recording-date {
+    display: inline-flex;
+    align-items: center;
+    background-color: rgba(26, 188, 156, 0.1);
+    padding: 5px 12px;
+    border-radius: 20px;
+    color: #1abc9c;
+}
+
+.content-date i,
+.webinar-date i,
+.recording-date i {
+    margin-right: 5px;
+    color: #1abc9c;
+}
+
+.content-topics {
+    display: inline-flex;
+    align-items: center;
+}
+
+.content-topics:before {
+    content: '\f02b'; /* tag icon */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    margin-right: 8px;
+    color: #7f8c8d;
+}
+
+.content-excerpt,
+.webinar-excerpt,
+.recording-excerpt {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 0;
+    line-height: 1.5;
+}
+
+.content-actions,
+.webinar-actions,
+.recording-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+/* ========== Webinar Countdown ========== */
+.webinar-countdown {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0;
+    background-color: rgba(26, 188, 156, 0.05);
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.countdown-unit {
+    text-align: center;
+    min-width: 70px;
+}
+
+.countdown-value {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1;
+    background-color: white;
+    border-radius: 8px;
+    padding: 12px 0;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.countdown-label {
+    display: block;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    margin-top: 8px;
+    color: #666;
+    letter-spacing: 0.5px;
+}
+
+/* ========== Section Footer ========== */
+.section-footer {
+    margin-top: 30px;
+    text-align: center;
+    width: 100%;
+}
+
+/* ========== Account Section ========== */
+.account-section {
+    text-align: center;
+    background-color: #f9fafc;
+    padding: 35px;
+    border-radius: 12px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.account-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    justify-content: center;
+    max-width: 350px;
+    margin: 0 auto;
+}
+
+.account-actions .button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.account-actions .button i {
+    margin-right: 10px;
+}
+
+/* ========== Button Styles ========== */
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(90deg, #1abc9c, #16a085);
+    color: white;
+    font-weight: 600;
+    padding: 13px 25px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    text-align: center;
+    cursor: pointer;
+    line-height: 1.5;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(26, 188, 156, 0.2);
+    width: auto;
+}
+
+.button:hover {
+    background: linear-gradient(90deg, #16a085, #1abc9c);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(26, 188, 156, 0.3);
+}
+
+.button-secondary {
+    background: linear-gradient(90deg, #2c3e50, #34495e);
+    box-shadow: 0 4px 12px rgba(44, 62, 80, 0.2);
+}
+
+.button-secondary:hover {
+    background: linear-gradient(90deg, #34495e, #2c3e50);
+    box-shadow: 0 6px 15px rgba(44, 62, 80, 0.3);
+}
+
+.button-outline {
+    background: transparent;
+    border: 2px solid #1abc9c;
+    color: #1abc9c;
+    box-shadow: none;
+}
+
+.button-outline:hover {
+    background: #1abc9c;
+    color: white;
+    box-shadow: 0 6px 15px rgba(26, 188, 156, 0.3);
+}
+
+.button-large {
+    padding: 16px 32px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+}
+
+.button-small {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+
+/* ========== Empty State & Messages ========== */
+.empty-section {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: #f9fafc;
+    border-radius: 10px;
+    border: 1px dashed #ddd;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.empty-section h3 {
+    font-size: 1.3rem;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+.empty-section p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.dashboard-error {
+    background-color: #fdf2f2;
+    border-left: 4px solid #e53e3e;
+    padding: 20px;
+    border-radius: 6px;
+    color: #c53030;
+    max-width: 800px;
+    margin: 0 auto 30px;
+}
+
+.dashboard-info {
+    background-color: #e6f7ff;
+    border-left: 4px solid #1890ff;
+    padding: 20px;
+    border-radius: 6px;
+    color: #0c53b7;
+    max-width: 800px;
+    margin: 0 auto 30px;
+}
+
+/* ========== Media Queries ========== */
+@media (min-width: 768px) {
+    .upgrade-options {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .upgrade-option {
+        flex: 1;
+        min-width: 250px;
+        max-width: calc(33% - 20px);
+    }
+    
+    .content-item,
+    .webinar-item,
+    .recording-item {
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    .content-item-details,
+    .webinar-item-details,
+    .recording-item-details {
+        padding-right: 30px;
+        margin-bottom: 0;
+    }
+    
+    .content-actions,
+    .webinar-actions,
+    .recording-actions {
+        flex-direction: column;
+        justify-content: center;
+        width: auto;
+        min-width: 150px;
+    }
+    
+    .account-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+        max-width: 100%;
+    }
+    
+    .account-actions .button {
+        width: auto;
+    }
+}
+
+@media (min-width: 992px) {
+    .rts-dashboard {
+        padding: 50px;
+    }
+    
+    .dashboard-header {
+        text-align: left;
+    }
+    
+    .dashboard-header:before {
+        left: 0;
+        transform: none;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+    }
+    
+    .welcome-message {
+        margin: 0;
+    }
+    
+    .dashboard-section h2 {
+        text-align: left;
+        font-size: 1.8rem;
+    }
+    
+    .dashboard-section h2:after {
+        left: 0;
+        transform: none;
+    }
+    
+    .subscription-list,
+    .content-list,
+    .webinar-list,
+    .recording-list {
+        margin: 0;
+    }
+    
+    .upgrade-section {
+        text-align: left;
+        padding: 40px;
+    }
+    
+    .upgrade-section h2:after {
+        left: 0;
+        transform: none;
+    }
+    
+    .upgrade-section > p {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    
+    .account-section {
+        text-align: left;
+    }
+    
+    .account-section h2:after {
+        left: 0;
+        transform: none;
+    }
+    
+    .account-actions {
+        justify-content: flex-start;
+        margin: 0;
+    }
+}
+
+@media (max-width: 767px) {
+    .rts-dashboard {
+        padding: 30px 20px;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+    
+    .dashboard-section h2 {
+        font-size: 1.5rem;
+    }
+    
+    .subscription-item,
+    .content-item,
+    .webinar-item,
+    .recording-item {
+        padding: 20px;
+    }
+    
+    .subscription-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .subscription-name {
+        margin-bottom: 15px;
+        width: 100%;
+    }
+    
+    .subscription-actions {
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    .content-actions,
+    .webinar-actions,
+    .recording-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .upgrade-price {
+        font-size: 1.8rem;
+    }
+    
+    .upgrade-section,
+    .account-section {
+        padding: 25px 20px;
+    }
+    
+    .button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .rts-dashboard {
+        padding: 20px 15px;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .welcome-message {
+        font-size: 1rem;
+    }
+    
+    .dashboard-section {
+        margin-bottom: 30px;
+        padding-bottom: 25px;
+    }
+    
+    .dashboard-section h2 {
+        font-size: 1.4rem;
+        margin-bottom: 20px;
+    }
+    
+    .subscription-item h3,
+    .content-item h3,
+    .webinar-item h3 {
+        font-size: 1.2rem;
+    }
+    
+    .content-meta,
+    .webinar-meta {
+        gap: 10px;
+    }
+    
+    .content-date,
+    .webinar-date {
+        padding: 4px 10px;
+        font-size: 0.8rem;
+    }
+    
+    .webinar-countdown {
+        flex-wrap: wrap;
+    }
+    
+    .countdown-value {
+        font-size: 1.4rem;
+        padding: 8px 0;
+    }
+    
+    .countdown-unit {
+        min-width: 60px;
+    }
+}
+
+/* Button fixes for mobile view */
+@media (max-width: 767px) {
+    /* Make sure buttons have proper spacing and sizing */
+    .content-actions,
+    .webinar-actions,
+    .recording-actions {
+        width: 100%;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    /* Ensure consistent button styling */
+    .button {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        margin: 0;
+        text-align: center;
+        justify-content: center;
+    }
+    
+    /* Fix content item layout */
+    .content-item,
+    .webinar-item,
+    .recording-item {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 15px;
+    }
+    
+    /* Ensure item details take full width */
+    .content-item-details,
+    .webinar-item-details,
+    .recording-item-details {
+        width: 100%;
+        padding-right: 0;
+        margin-bottom: 15px;
+    }
+    
+    /* Modify date display for better mobile layout */
+    .content-date,
+    .webinar-date,
+    .recording-date {
+        display: inline-flex;
+        padding: 4px 8px;
+        font-size: 0.8rem;
+    }
+    
+    /* Subscription item mobile adjustment */
+    .subscription-item {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .subscription-actions {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 15px;
+    }
+}

@@ -1,0 +1,91 @@
+/* Primary Navigation Styles */
+.navbar-nav .nav-link {
+    padding: 1rem 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.navbar-nav .dropdown-menu {
+    border: none;
+    margin-top: 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-radius: 0.25rem;
+}
+
+.navbar-nav .dropdown-item {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+}
+
+.navbar-nav .dropdown-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Mobile Off-Canvas Menu */
+.offcanvas {
+    width: 320px;
+}
+
+.mobile-nav li {
+    position: relative;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-nav li:last-child {
+    border-bottom: none;
+}
+
+.mobile-link {
+    color: #fff;
+    text-decoration: none;
+    padding: 12px 0;
+    display: block;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.mobile-link:hover, 
+.mobile-link:focus {
+    color: #fff;
+    text-decoration: none;
+    opacity: 0.8;
+}
+
+.mobile-nav .active > .mobile-link {
+    color: var(--bs-primary);
+}
+
+.mobile-submenu {
+    display: none;
+}
+
+.mobile-dropdown-toggle {
+    transition: transform 0.3s ease;
+}
+
+.mobile-dropdown.show .mobile-dropdown-toggle {
+    transform: rotate(180deg);
+}
+
+.mobile-submenu .mobile-link {
+    padding: 8px 0;
+    font-size: 0.95rem;
+}
+
+/* Top Bar Styles */
+.top-bar {
+    font-size: 0.85rem;
+}
+
+.top-socials a {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.top-socials a:hover {
+    opacity: 1;
+}

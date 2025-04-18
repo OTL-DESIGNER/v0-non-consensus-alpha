@@ -1,0 +1,356 @@
+/** Colors **/
+.eroom_go_pro .stm_go_pro_menu {
+  font-size: 17px; }
+
+.eroom_go_pro .stm_go_pro {
+  box-sizing: border-box; }
+
+.eroom_go_pro .container {
+  box-sizing: border-box;
+  padding-right: 10px;
+  padding-left: 10px;
+  max-width: 960px;
+  margin: 0 auto; }
+
+.eroom_go_pro .row {
+  display: flex;
+  margin-right: -10px;
+  margin-left: -10px;
+  flex-wrap: wrap; }
+
+.eroom_go_pro .col-md-4 {
+  position: relative;
+  padding-right: 10px;
+  padding-left: 10px;
+  width: 100%;
+  box-sizing: border-box; }
+
+@media (min-width: 768px) {
+  .eroom_go_pro .col-md-4 {
+    width: 33.3333333333%;
+    flex: 0 0 auto; } }
+
+.eroom_go_pro .stm_go_pro h2 {
+  color: #273044;
+  font-size: 30px;
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: normal;
+  line-height: 26px;
+  text-align: center;
+  margin: 0; }
+
+.eroom_go_pro .stm_go_pro_plugin {
+  text-align: center;
+  padding-top: 55px;
+  box-sizing: border-box; }
+  .eroom_go_pro .stm_go_pro_plugin__title {
+    display: flex;
+    justify-content: center;
+    align-items: center; }
+    .eroom_go_pro .stm_go_pro_plugin__title::before {
+      width: 50px;
+      height: 50px;
+      margin-right: 5px;
+      content: '';
+      background-image: url("../../images/zoom_icon.png");
+      background-size: contain;
+      background-repeat: no-repeat; }
+  .eroom_go_pro .stm_go_pro_plugin__content {
+    margin-top: 15px;
+    margin-bottom: 36px;
+    color: #44515f;
+    font-size: 16px;
+    font-weight: 400;
+    font-style: normal;
+    letter-spacing: 0.32px;
+    line-height: 22px; }
+
+.eroom_go_pro .stm-type-pricing {
+  margin-top: 19px;
+  display: flex;
+  justify-content: center;
+  align-items: center; }
+  .eroom_go_pro .stm-type-pricing .left, .eroom_go_pro .stm-type-pricing .right {
+    opacity: 0.5;
+    color: #273044;
+    font-size: 16px;
+    font-weight: 400;
+    font-style: normal;
+    letter-spacing: normal;
+    line-height: 26.05px;
+    text-align: center;
+    padding: 0 18px; }
+    .eroom_go_pro .stm-type-pricing .left.active, .eroom_go_pro .stm-type-pricing .right.active {
+      opacity: 1; }
+  .eroom_go_pro .stm-type-pricing__switch {
+    position: relative;
+    line-height: 1; }
+    .eroom_go_pro .stm-type-pricing__switch input {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      z-index: 5;
+      opacity: 0;
+      cursor: pointer; }
+      .eroom_go_pro .stm-type-pricing__switch input:checked + label {
+        background: #157ffc !important; }
+        .eroom_go_pro .stm-type-pricing__switch input:checked + label:after {
+          background: #fff;
+          left: 27px; }
+    .eroom_go_pro .stm-type-pricing__switch label {
+      display: inline-block;
+      position: relative;
+      width: 51px;
+      min-width: 51px;
+      height: 27px;
+      margin: 0;
+      border-radius: 13px;
+      background-color: #273044;
+      cursor: pointer;
+      transition: .4s;
+      -webkit-transition: .4s; }
+      .eroom_go_pro .stm-type-pricing__switch label:after {
+        content: "";
+        position: absolute;
+        width: 21px;
+        height: 21px;
+        left: 3px;
+        top: 3px;
+        border-radius: 10px;
+        background-color: #ffffff;
+        transition: .4s;
+        -webkit-transition: .4s;
+        z-index: 2; }
+
+.eroom_go_pro .stm_plan {
+  display: flex;
+  padding: 65px 45px 49px;
+  margin-top: 41px;
+  box-sizing: border-box;
+  flex-direction: column;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  background-color: #ffffff; }
+  .eroom_go_pro .stm_plan__type {
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    padding: 4px 6px;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 16px;
+    border-radius: 20px;
+    -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+    white-space: nowrap; }
+  .eroom_go_pro .stm_plan--developer, .eroom_go_pro .stm_plan--popular {
+    position: relative; }
+  .eroom_go_pro .stm_plan--developer .stm_plan__type {
+    padding: 4px 12px;
+    background-color: #000000; }
+  .eroom_go_pro .stm_plan--popular {
+    border: 2px solid #157ffc; }
+  .eroom_go_pro .stm_plan--popular .stm_plan__type {
+    background-color: #157ffc; }
+    .eroom_go_pro .stm_plan--popular .stm_plan__type::before {
+      width: 10px;
+      height: 14px;
+      margin-right: 4px;
+      content: '';
+      background-image: url("../../images/popular.svg");
+      background-size: contain;
+      background-repeat: no-repeat; }
+  .eroom_go_pro .stm_plan__title {
+    color: #273044;
+    font-size: 16px;
+    font-weight: 500;
+    font-style: normal;
+    letter-spacing: normal;
+    line-height: 16px;
+    text-align: center;
+    margin-top: 8px;
+    margin-bottom: 28px; }
+  .eroom_go_pro .stm_plan__btn {
+    width: 100%;
+    border-radius: 4px;
+    border: 2px solid #157ffc;
+    text-transform: uppercase;
+    text-decoration: none;
+    display: block;
+    text-align: center;
+    padding-bottom: 13px;
+    padding-top: 13px;
+    color: #157ffc;
+    font-size: 14px;
+    font-weight: 700;
+    font-style: normal;
+    letter-spacing: 0.56px;
+    line-height: 18px; }
+    .eroom_go_pro .stm_plan__btn--buy {
+      display: flex;
+      align-items: center;
+      justify-content: center; }
+      .eroom_go_pro .stm_plan__btn--buy::before {
+        width: 19px;
+        height: 17px;
+        margin-right: 11px;
+        content: '';
+        background-image: url("../../images/cart.svg");
+        background-size: contain;
+        background-repeat: no-repeat; }
+    .eroom_go_pro .stm_plan__btn:hover {
+      background-color: #157ffc;
+      color: #fff; }
+      .eroom_go_pro .stm_plan__btn:hover::before {
+        -webkit-filter: brightness(100);
+                filter: brightness(100); }
+  .eroom_go_pro .stm_plan__link-upgrade {
+    margin-top: 10px;
+    color: #157ffc;
+    font-size: 12px;
+    font-weight: 400;
+    font-style: normal;
+    letter-spacing: normal;
+    line-height: 22px;
+    text-align: center;
+    text-decoration: underline; }
+    .eroom_go_pro .stm_plan__link-upgrade:hover {
+      color: #157ffc; }
+
+.eroom_go_pro .stm_price {
+  color: #273044;
+  font-size: 40px;
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: -1.6px;
+  line-height: 25.98px;
+  text-align: center;
+  white-space: nowrap; }
+  .eroom_go_pro .stm_price sup {
+    color: #273044;
+    font-size: 18px;
+    font-weight: 700;
+    font-style: normal;
+    letter-spacing: normal;
+    line-height: 25.98px;
+    text-align: center; }
+  .eroom_go_pro .stm_price .discount {
+    font-size: 30px;
+    color: #768493;
+    display: inline-block;
+    margin-left: -5px;
+    position: relative; }
+    .eroom_go_pro .stm_price .discount p {
+      display: inline; }
+    .eroom_go_pro .stm_price .discount span {
+      font-size: 18px; }
+    .eroom_go_pro .stm_price .discount::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0px;
+      height: 1px;
+      width: calc(100% + 0px);
+      background-color: #768493; }
+  .eroom_go_pro .stm_price small {
+    opacity: 0.5;
+    color: #273044;
+    font-size: 14px;
+    font-weight: 400;
+    font-style: normal;
+    letter-spacing: normal;
+    line-height: 25.98px;
+    text-align: left; }
+    .eroom_go_pro .stm_price small.hidden {
+      display: none; }
+
+.eroom_go_pro .stm_terms_content {
+  margin-top: 29px;
+  margin-bottom: 19px;
+  color: #969aa5;
+  font-size: 14px;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: normal;
+  line-height: 22px;
+  text-align: center;
+  text-decoration: none; }
+  .eroom_go_pro .stm_terms_content a {
+    color: #157ffc; }
+
+.eroom_go_pro .stm_last_changelog_info {
+  display: flex;
+  justify-content: center;
+  border-radius: 4px;
+  background-color: #ffffff;
+  opacity: 0.7;
+  padding-top: 12px;
+  padding-bottom: 10px; }
+  @media screen and (max-width: 767px) {
+    .eroom_go_pro .stm_last_changelog_info {
+      display: block; } }
+  .eroom_go_pro .stm_last_changelog_info li {
+    padding-right: 30px;
+    padding-left: 30px;
+    color: #273044; }
+  .eroom_go_pro .stm_last_changelog_info--label {
+    opacity: 0.7; }
+  .eroom_go_pro .stm_last_changelog_info--value {
+    color: #273044;
+    font-size: 14px;
+    font-weight: 400;
+    font-style: normal;
+    letter-spacing: normal;
+    line-height: 22px; }
+    .eroom_go_pro .stm_last_changelog_info--value a {
+      color: #273044;
+      text-decoration: underline; }
+
+.stm-discount {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url(../../images/black-friday.jpg);
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  border-radius: 10px;
+  margin-top: 50px;
+  margin-bottom: 30px;
+  position: relative;
+  height: 120px; }
+  .stm-discount a {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    outline: none;
+    box-shadow: none; }
+    .stm-discount a:focus, .stm-discount a:visited {
+      outline: none; }
+  .stm-discount__title {
+    padding: 32px 0;
+    text-align: center;
+    font-family: inherit;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 28px;
+    letter-spacing: 0.96px;
+    text-transform: uppercase;
+    color: #ffffff; }
+    .stm-discount__title-outline {
+      display: block;
+      text-shadow: 0 1px 0 #ffffff, 0 -1px 0 #ffffff, 1px 0 0 #ffffff, -1px 0 0 #ffffff, 1px 1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, -1px -1px 0 #ffffff;
+      color: #000000; }
+    @media (max-width: 580px) {
+      .stm-discount__title {
+        font-size: 18px; } }

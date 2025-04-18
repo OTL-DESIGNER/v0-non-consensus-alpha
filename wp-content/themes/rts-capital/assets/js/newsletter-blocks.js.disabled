@@ -1,0 +1,257 @@
+(function(blocks, editor, components, i18n, element) {
+    var el = element.createElement;
+    var registerBlockType = blocks.registerBlockType;
+    var RichText = editor.RichText;
+    var BlockControls = editor.BlockControls;
+    var InspectorControls = editor.InspectorControls;
+    var TextControl = components.TextControl;
+    var SelectControl = components.SelectControl;
+    var PanelBody = components.PanelBody;
+    
+    // Register Key Takeaway Block
+    registerBlockType('newsletter/key-takeaway', {
+        title: 'Key Takeaway',
+        icon: 'lightbulb',
+        category: 'common',
+        attributes: {
+            title: {
+                type: 'string',
+                default: 'Key Takeaway'
+            },
+            message: {
+                type: 'string',
+                default: ''
+            },
+            icon: {
+                type: 'string',
+                default: 'lightbulb'
+            }
+        },
+        
+        edit: function(props) {
+            var attributes = props.attributes;
+            
+            return [
+                el(InspectorControls, { key: 'inspector' },
+                    el(PanelBody, { title: 'Takeaway Settings', initialOpen: true },
+                        el(TextControl, {
+                            label: 'Title',
+                            value: attributes.title,
+                            onChange: function(value) {
+                                props.setAttributes({ title: value });
+                            }
+                        }),
+                        el(SelectControl, {
+                            label: 'Icon',
+                            value: attributes.icon,
+                            options: [
+                                { label: 'Lightbulb', value: 'lightbulb' },
+                                { label: 'Info', value: 'info' },
+                                { label: 'Star', value: 'star-filled' },
+                                { label: 'Warning', value: 'warning' },
+                                { label: 'Chart', value: 'chart-bar' }
+                            ],
+                            onChange: function(value) {
+                                props.setAttributes({ icon: value });
+                            }
+                        })
+                    )
+                ),
+                el('div', { className: props.className + ' newsletter-key-takeaway-editor' },
+                    el('div', { className: 'takeaway-icon' },
+                        el('span', { className: 'dashicons dashicons-' + attributes.icon })
+                    ),
+                    el('div', { className: 'takeaway-content' },
+                        el('h4', {}, attributes.title),
+                        el(RichText, {
+                            tagName: 'p',
+                            value: attributes.message,
+                            onChange: function(value) {
+                                props.setAttributes({ message: value });
+                            },
+                            placeholder: 'Enter your key takeaway message here...'
+                        })
+                    )
+                )
+            ];
+        },
+        
+        save: function() {
+            // Rendered in PHP
+            return null;
+        }
+    });
+    
+    // Register Data Chart Block
+    registerBlockType('newsletter/data-chart', {
+        title: 'Data Chart',
+        icon: 'chart-bar',
+        category: 'common',
+        attributes: {
+            title: {
+                type: 'string',
+                default: 'Chart'
+            },
+            chartType: {
+                type: 'string',
+                default: 'bar'
+            },
+            chartData: {
+                type: 'string',
+                default: JSON.stringify({
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                    datasets: [{
+                        label: 'Data',
+                        data: [12, 19, 3, 5, 2],
+                        backgroundColor: [
+                            'rgba(26, 188, 156, 0.6)',
+                            'rgba(52, 152, 219, 0.6)',
+                            'rgba(241, 196, 15, 0.6)',
+                            'rgba(231, 76, 60, 0.6)',
+                            'rgba(155, 89, 182, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(26, 188, 156, 1)',
+                            'rgba(52, 152, 219, 1)',
+                            'rgba(241, 196, 15, 1)',
+                            'rgba(231, 76, 60, 1)',
+                            'rgba(155, 89, 182, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                })
+            }
+        },
+        
+        edit: function(props) {
+            var attributes = props.attributes;
+            
+            return [
+                el(InspectorControls, { key: 'inspector' },
+                    el(PanelBody, { title: 'Chart Settings', initialOpen: true },
+                        el(TextControl, {
+                            label: 'Title',
+                            value: attributes.title,
+                            onChange: function(value) {
+                                props.setAttributes({ title: value });
+                            }
+                        }),
+                        el(SelectControl, {
+                            label: 'Chart Type',
+                            value: attributes.chartType,
+                            options: [
+                                { label: 'Bar Chart', value: 'bar' },
+                                { label: 'Line Chart', value: 'line' },
+                                { label: 'Pie Chart', value: 'pie' },
+                                { label: 'Doughnut Chart', value: 'doughnut' }
+                            ],
+                            onChange: function(value) {
+                                props.setAttributes({ chartType: value });
+                            }
+                        }),
+                        el(TextControl, {
+                            label: 'Chart Data (JSON)',
+                            value: attributes.chartData,
+                            onChange: function(value) {
+                                props.setAttributes({ chartData: value });
+                            }
+                        })
+                    )
+                ),
+                el('div', { className: props.className + ' newsletter-data-chart-editor' },
+                    el('h4', {}, attributes.title),
+                    el('div', { className: 'chart-placeholder' },
+                        el('div', { className: 'chart-icon' },
+                            el('span', { className: 'dashicons dashicons-chart-' + 
+                                (attributes.chartType === 'pie' || attributes.chartType === 'doughnut' ? 'pie' : 'bar')
+                            })
+                        ),
+                        el('p', {}, 'Chart will be rendered here (Chart Type: ' + attributes.chartType + ')')
+                    )
+                )
+            ];
+        },
+        
+        save: function() {
+            // Rendered in PHP
+            return null;
+        }
+    });
+    
+    // Register Callout Block
+    registerBlockType('newsletter/callout', {
+        title: 'Callout',
+        icon: 'megaphone',
+        category: 'common',
+        attributes: {
+            style: {
+                type: 'string',
+                default: 'info'
+            },
+            title: {
+                type: 'string',
+                default: ''
+            },
+            message: {
+                type: 'string',
+                default: ''
+            }
+        },
+        
+        edit: function(props) {
+            var attributes = props.attributes;
+            
+            return [
+                el(InspectorControls, { key: 'inspector' },
+                    el(PanelBody, { title: 'Callout Settings', initialOpen: true },
+                        el(SelectControl, {
+                            label: 'Style',
+                            value: attributes.style,
+                            options: [
+                                { label: 'Info', value: 'info' },
+                                { label: 'Success', value: 'success' },
+                                { label: 'Warning', value: 'warning' },
+                                { label: 'Error', value: 'error' },
+                                { label: 'Note', value: 'note' }
+                            ],
+                            onChange: function(value) {
+                                props.setAttributes({ style: value });
+                            }
+                        })
+                    )
+                ),
+                el('div', { className: props.className + ' newsletter-callout-editor callout-' + attributes.style },
+                    el(RichText, {
+                        tagName: 'h4',
+                        className: 'callout-title',
+                        value: attributes.title,
+                        onChange: function(value) {
+                            props.setAttributes({ title: value });
+                        },
+                        placeholder: 'Callout Title (Optional)'
+                    }),
+                    el(RichText, {
+                        tagName: 'div',
+                        className: 'callout-content',
+                        value: attributes.message,
+                        onChange: function(value) {
+                            props.setAttributes({ message: value });
+                        },
+                        placeholder: 'Enter your callout message here...'
+                    })
+                )
+            ];
+        },
+        
+        save: function() {
+            // Rendered in PHP
+            return null;
+        }
+    });
+})(
+    window.wp.blocks,
+    window.wp.blockEditor,
+    window.wp.components,
+    window.wp.i18n,
+    window.wp.element
+);

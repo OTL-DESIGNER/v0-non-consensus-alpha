@@ -1,0 +1,500 @@
+/**
+ * Non-Consensus Alpha - Webinar Styles
+ * Custom styles for webinar pages
+ */
+
+:root {
+  /* Non-Consensus Alpha Brand Colors */
+  --nca-orange: #ff9800;        /* Primary orange from logo */
+  --nca-orange-light: #ffb74d;  /* Lighter orange */
+  --nca-orange-dark: #f57c00;   /* Darker orange */
+  --nca-white: #ffffff;         /* White */
+  --nca-dark: #333333;          /* Dark gray for text */
+  --nca-gray: #757575;          /* Medium gray */
+  --nca-light-gray: #f5f5f5;    /* Light gray background */
+  --nca-black: #212121;         /* Near black */
+  
+  /* Update Bootstrap variables */
+  --bs-primary: var(--nca-orange);
+  --bs-primary-rgb: 255, 152, 0;
+  --bs-secondary: var(--nca-gray);
+  --bs-secondary-rgb: 117, 117, 117;
+  --bs-light: var(--nca-light-gray);
+}
+
+/* Typography Improvements */
+body {
+  color: var(--nca-dark);
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.6;
+}
+
+/* Improved Heading Readability */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6,
+.display-1, .display-2, .display-3, .display-4, .display-5, .display-6 {
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--nca-dark);
+}
+
+.display-5 {
+  font-size: 2.5rem;
+  line-height: 1.2;
+}
+
+/* Enhance text on dark backgrounds */
+.bg-primary, 
+.text-white,
+.card-header.bg-primary {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.text-primary {
+  color: var(--nca-orange) !important;
+}
+
+/* Card Styling */
+.card {
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+  border-bottom: 0;
+  padding: 1rem 1.25rem;
+}
+
+.card-header.bg-primary {
+  background-color: var(--nca-orange) !important;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Button Styling */
+.btn-primary {
+  background-color: var(--nca-orange);
+  border-color: var(--nca-orange);
+  font-weight: 500;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover, 
+.btn-primary:focus {
+  background-color: var(--nca-orange-dark);
+  border-color: var(--nca-orange-dark);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-outline-primary {
+  color: var(--nca-orange);
+  border-color: var(--nca-orange);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--nca-orange);
+  border-color: var(--nca-orange);
+  color: white;
+}
+
+/* Icon Styling */
+.fa, .fas, .far, .fab {
+  margin-right: 0.25rem;
+}
+
+/* Webinar Header */
+.webinar-single .entry-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 1rem;
+}
+
+.webinar-single .entry-meta {
+  margin-bottom: 1.5rem;
+}
+
+.webinar-single .webinar-topics {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Webinar Details List */
+.list-group-item {
+  padding: 1rem 0;
+  transition: all 0.2s ease;
+}
+
+.list-group-item:hover {
+  background-color: rgba(255, 152, 0, 0.05);
+}
+
+/* Featured Image */
+.featured-image img {
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Countdown Timer */
+.webinar-countdown-container {
+  background-color: var(--nca-light-gray);
+  border-left: 4px solid var(--nca-orange);
+}
+
+.countdown {
+  will-change: contents;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  height: 100px; /* Fixed height to prevent layout shifts */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.countdown-row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  min-height: 60px;
+}
+
+/* Value containers with consistent dimensions */
+.countdown-value {
+  height: 44px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--nca-orange, #ff9800);
+  color: white;
+  font-weight: bold;
+  font-size: 1.5rem;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  
+  /* Reduce transitions to just opacity to minimize repaints */
+  transition: opacity 0.15s ease-in-out;
+  
+  /* Add hardware acceleration */
+  transform: translateZ(0);
+}
+
+/* Fixed width columns to prevent shifts */
+.countdown-item {
+  padding: 0 5px;
+  width: 25%;
+  text-align: center;
+}
+
+.countdown-label {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #757575;
+  height: 1rem;
+}
+
+/* Live Now Indicator */
+.live-now {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #dc3545;
+  padding: 1rem;
+  font-size: 1.5rem;
+  height: 100%;
+  
+  /* Add hardware acceleration */
+  transform: translateZ(0);
+}
+
+.blink {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
+/* Webinar countdown container */
+.webinar-countdown-container {
+  background-color: #f5f5f5;
+  border-left: 4px solid var(--nca-orange, #ff9800);
+  /* Add specific height to prevent layout shifts */
+  min-height: 260px;
+}
+
+/* Make sure the entire timer area is stable */
+.countdown-title {
+  color: var(--nca-orange, #ff9800);
+  margin-bottom: 1.5rem;
+  text-align: center;
+  height: 1.5rem;
+}
+
+/* Force a repaint on page load to minimize flicker */
+@media screen and (min-width: 0) {
+  .countdown, .countdown-value, .countdown-row {
+    animation: forceRepaint 0.1s forwards ease-in-out;
+  }
+}
+
+@keyframes forceRepaint {
+  0% { opacity: 0.99; }
+  100% { opacity: 1; }
+}
+
+/* Fix for Safari flicker issues */
+@supports (-webkit-overflow-scrolling: touch) {
+  .countdown, .countdown-value {
+    -webkit-transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+  }
+}
+
+/* Fix for Firefox */
+@-moz-document url-prefix() {
+  .countdown-value {
+    transform: translateZ(0);
+  }
+}
+
+/* Live Now Indicator */
+.live-now {
+  animation: fadeIn 0.5s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #dc3545;
+  padding: 1rem;
+  font-size: 1.5rem;
+}
+
+.blink {
+  animation: blink 1s infinite;
+}
+
+/* Webinar Join Button */
+.webinar-join {
+  text-align: center;
+}
+
+.webinar-join .btn {
+  padding: 0.75rem 2rem;
+  font-size: 1.1rem;
+}
+
+/* Video Container */
+.video-container {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+}
+
+.video-container iframe {
+  border: 0;
+}
+
+/* Recording Password Box */
+.alert-info {
+  background-color: rgba(255, 152, 0, 0.1);
+  border-color: rgba(255, 152, 0, 0.2);
+  color: var(--nca-dark);
+}
+
+#recording-password {
+  font-family: monospace;
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin: 0 0.25rem;
+}
+
+#copy-password-btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+/* Questions Form */
+.wpforms-container {
+  margin-top: 1rem;
+}
+
+.wpforms-field {
+  margin-bottom: 1.5rem;
+}
+
+.wpforms-field-label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--nca-dark);
+}
+
+.wpforms-field-description {
+  color: var(--nca-gray);
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+.wpforms-submit-container {
+  text-align: right;
+}
+
+.wpforms-submit {
+  background-color: var(--nca-orange) !important;
+  border: none !important;
+  color: white !important;
+  padding: 0.5rem 1.5rem !important;
+  font-weight: 500 !important;
+  border-radius: 4px !important;
+  transition: all 0.3s ease !important;
+}
+
+.wpforms-submit:hover {
+  background-color: var(--nca-orange-dark) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Related & More Webinars */
+.list-group-item-action {
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.list-group-item-action:hover {
+  background-color: rgba(255, 152, 0, 0.05);
+  transform: translateX(3px);
+}
+
+.list-group-item-action h5 {
+  transition: color 0.2s ease;
+}
+
+.list-group-item-action:hover h5 {
+  color: var(--nca-orange);
+}
+
+.badge.bg-light {
+  background-color: rgba(255, 152, 0, 0.1) !important;
+  color: var(--nca-orange-dark) !important;
+  transition: all 0.2s ease;
+}
+
+.badge.bg-light:hover {
+  background-color: rgba(255, 152, 0, 0.2) !important;
+}
+
+/* Upcoming Events */
+.bg-primary.text-white.text-center.rounded {
+  background-color: var(--nca-orange) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Presenter Card */
+.presenter-bio {
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.rounded-circle {
+  border: 3px solid var(--nca-orange);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Animation Keyframes */
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .display-5 {
+    font-size: 2rem;
+  }
+  
+  .card-body {
+    padding: 1.25rem;
+  }
+  
+  .countdown-value {
+    font-size: 1.25rem;
+    padding: 0.4rem;
+  }
+}
+
+/* Accessibility Improvements */
+a:focus, button:focus, input:focus, textarea:focus {
+  outline: 2px solid var(--nca-orange);
+  outline-offset: 2px;
+}
+
+/* Non-Consensus Alpha Specific Styles */
+.nca-divider {
+  height: 4px;
+  background: linear-gradient(to right, var(--nca-orange), var(--nca-orange-light));
+  margin: 2rem 0;
+  border-radius: 2px;
+}
+
+.non-consensus-badge {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--nca-orange);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.non-consensus-badge:before {
+  content: "α";
+  font-family: serif;
+  margin-right: 0.35rem;
+  font-weight: bold;
+}
+
+/* Content Restriction Styling */
+.pms-content-restricted-message {
+  background-color: rgba(255, 152, 0, 0.05);
+  border: 1px solid rgba(255, 152, 0, 0.2);
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.pms-content-restricted-message h3 {
+  color: var(--nca-orange);
+  margin-bottom: 1rem;
+}
+

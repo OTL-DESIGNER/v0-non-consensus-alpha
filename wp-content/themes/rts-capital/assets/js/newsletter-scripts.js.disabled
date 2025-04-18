@@ -1,0 +1,187 @@
+/**
+ * RTS Capital - Newsletter Page Scripts
+ */
+(function($) {
+    'use strict';
+    
+    $(document).ready(function() {
+        // Initialize animations for cards when they come into view
+        initCardAnimations();
+        
+        // Initialize tooltips if any
+        initTooltips();
+        
+        // Handle PDF downloads tracking
+        trackPdfDownloads();
+        
+        // Handle sticky sidebar in desktop view
+        initStickySidebar();
+    });
+    
+    /**
+     * Initialize card animations when scrolling into view
+     */
+    function initCardAnimations() {
+        // Only run if IntersectionObserver is supported
+        if ('IntersectionObserver' in window) {
+            const cards = document.querySelectorAll('.newsletter-card');
+            
+            // Add initial state class
+            cards.forEach(card => {
+                card.classList.add('card-hidden');
+            });
+            
+            const cardObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Add animation class when card comes into view
+                        entry.target.classList.add('card-visible');
+                        // Stop observing after animation is triggered
+                        cardObserver.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+            
+            cards.forEach(card => {
+                cardObserver.observe(card);
+            });
+        } else {
+            // Fallback for browsers that don't support IntersectionObserver
+            $('.newsletter-card').addClass('card-visible');
+        }
+    }
+    
+    /**
+     * Initialize tooltips on elements with data-tooltip attribute
+     */
+    function initTooltips() {
+        // Check if tooltip library exists (Bootstrap or custom)
+        if (typeof $.fn.tooltip === 'function') {
+            $('[data-tooltip]').tooltip();
+        }
+    }
+    
+    /**
+     * Track PDF downloads for analytics
+     */
+    function trackPdfDownloads() {
+        $('.newsletter-actions a[href$=".pdf"]').on('click', function() {
+            const newsletterTitle = $(this).closest('.newsletter-card')
+                .find('.newsletter-title').text().trim();
+            
+            // If Google Analytics is available
+            if (typeof ga === 'function') {
+                ga('send', 'event', {
+                    eventCategory: 'PDF Download',
+                    eventAction: 'click',
+                    eventLabel: newsletterTitle
+                });
+            }
+            
+            // If Google Tag Manager is available
+            if (typeof dataLayer !== 'undefined') {
+                dataLayer.push({
+                    'event': 'pdf_download',
+                    'pdf_title': newsletterTitle
+                });
+            }
+        });
+    }
+    
+    /**
+     * Initialize sticky sidebar in desktop view
+     */
+    function initStickySidebar() {
+        const sidebar = $('.sidebar-content');
+        
+        // Only initialize on desktop
+        if (window.innerWidth >= 992 && sidebar.length) {
+            const content = $('.content');
+            const sidebarTop = sidebar.offset().top;
+            const adminBar = $('#wpadminbar');
+            const adminBarHeight = adminBar.length ? adminBar.height() : 0;
+            const topOffset = 30 + adminBarHeight;
+            
+            $(window).on('scroll', function() {
+                const scrollTop = $(window).scrollTop();
+                const contentBottom = content.offset().top + content.outerHeight();
+                const sidebarHeight = sidebar.outerHeight();
+                
+                // If sidebar is shorter than content, make it sticky
+                if (sidebarHeight < content.outerHeight()) {
+                    if (scrollTop > sidebarTop - topOffset) {
+                        // Check if sidebar bottom would go beyond content bottom
+                        if (scrollTop + sidebarHeight + topOffset < contentBottom) {
+                            sidebar.css({
+                                'position': 'fixed',
+                                'top': topOffset + 'px',
+                                'width': sidebar.parent().width() + 'px'
+                            });
+                        } else {
+                            // Pin sidebar to bottom of content
+                            sidebar.css({
+                                'position': 'absolute',
+                                'top': (contentBottom - sidebarHeight) + 'px',
+                                'width': sidebar.parent().width() + 'px'
+                            });
+                        }
+                    } else {
+                        // Reset to static position
+                        sidebar.css({
+                            'position': 'static',
+                            'top': 'auto'
+                        });
+                    }
+                }
+            });
+            
+            // Update on window resize
+            $(window).on('resize', function() {
+                sidebar.css({
+                    'width': sidebar.parent().width() + 'px'
+                });
+                
+                // Disable sticky on mobile
+                if (window.innerWidth < 992) {
+                    sidebar.css({
+                        'position': 'static',
+                        'top': 'auto',
+                        'width': 'auto'
+                    });
+                }
+            });
+        }
+    }
+
+})(jQuery);
+
+// Add these animation classes to your CSS
+document.addEventListener('DOMContentLoaded', function() {
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = `
+        .card-hidden {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        
+        .card-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        @media (prefers-reduced-motion: reduce) {
+            .card-hidden {
+                opacity: 1;
+                transform: translateY(0);
+                transition: none;
+            }
+        }
+    `;
+    document.head.appendChild(styleSheet);
+});
+
+
